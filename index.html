@@ -75,6 +75,7 @@
     }
     .cta:hover { background: var(--blue-dark); }
     .cta-note { display: block; margin-top: 10px; font-size: .85rem; color: var(--muted); }
+    .cta-note a { color: var(--blue); }
 
     /* ===== Sekce ===== */
     section { padding: 44px 0; }
@@ -128,15 +129,15 @@
     <img class="logo" src="icon.png" alt="Logo Čundr">
     <h1>Čundr</h1>
     <p class="tag">Turistická sociální síť. Naplánuj trasu, vyčundruj ji se zapnutým záznamem a poděl se s partou.</p>
-    <a class="cta" href="#stahnout">📥 Stáhnout pro Android</a>
-    <span class="cta-note">Zdarma · bez reklam · účet není povinný</span>
+    <a class="cta apk-link" href="https://github.com/Minsck/cundr-web/releases/latest">📥 Stáhnout pro Android</a>
+    <span class="cta-note">Zdarma · bez reklam · účet není povinný · <a href="#stahnout">jak nainstalovat?</a></span>
   </header>
 
   <div class="wrap">
     <section>
       <h2>Co Čundr umí</h2>
       <div class="grid">
-        <div class="card"><span class="emoji">🗺️</span><h3>Turistické mapy Mapy.com</h3><p>Plánování tras klikáním do mapy s routováním po turistických cestách, výškovým profilem a odhadem času.</p></div>
+        <div class="card"><span class="emoji">🗺️</span><h3>Turistické mapy Mapy.com</h3><p>Plánování tras klikáním do mapy s routováním po turistických cestách, výškovým profilem a odhadem času. Import i export GPX.</p></div>
         <div class="card"><span class="emoji">🥾</span><h3>Záznam čundru</h3><p>Zapni záznam a projdi trasu — appka počítá kilometry, převýšení i tempo. Ušlé trasy se sčítají do statistik.</p></div>
         <div class="card"><span class="emoji">🌍</span><h3>Veřejné trasy</h3><p>Sdílej svoje trasy s ostatními, procházej cizí, hodnoť hvězdami, komentuj a přidávej fotky z cesty.</p></div>
         <div class="card"><span class="emoji">🏕️</span><h3>Výpravy</h3><p>„Jdu to v sobotu, přidej se!" — vyhlas výpravu na trasu, domluvte se ve skupinovém chatu a vyražte spolu.</p></div>
@@ -144,7 +145,6 @@
         <div class="card"><span class="emoji">🛖</span><h3>Zajímavá místa</h3><p>Přístřešky, studánky, ohniště, kempy nebo hospody z OpenStreetMap — a vlastní místa od čundráků.</p></div>
         <div class="card"><span class="emoji">👥</span><h3>Přátelé a chat</h3><p>Přidej si kamarády, koukni na jejich statistiky, piš si s nimi a sdílejte si trasy napřímo.</p></div>
         <div class="card"><span class="emoji">🏅</span><h3>Body a odznaky</h3><p>Za poctivé kilometry, zveřejněné trasy a povedené fotky sbíráš body a odznaky. Vyhlašujte si výzvy.</p></div>
-        <div class="card"><span class="emoji">📄</span><h3>GPX import a export</h3><p>Trasy si vezmeš odkudkoliv a odneseš kamkoliv — plná podpora GPX souborů.</p></div>
         <div class="card"><span class="emoji">🆘</span><h3>SOS tlačítko</h3><p>Nouzové tlačítko pošle SMS s tvojí přesnou polohou kontaktním osobám a nabídne volání na 112.</p></div>
       </div>
     </section>
@@ -155,7 +155,7 @@
         <span class="emoji">🤖</span>
         <h3>Čundr pro Android (APK)</h3>
         <p>Aplikace je ve vývoji — instaluje se zatím ručně přes APK. Verze pro Google Play se chystá.</p>
-        <a class="cta" href="https://github.com/Minsck/cundr-web/releases/latest" style="margin-top:18px">📥 Stáhnout nejnovější APK</a>
+        <a class="cta apk-link" href="https://github.com/Minsck/cundr-web/releases/latest" style="margin-top:18px">📥 Stáhnout nejnovější APK</a>
         <ol>
           <li>Stáhni APK do telefonu.</li>
           <li>Otevři soubor a povol instalaci z tohoto zdroje, když se telefon zeptá.</li>
@@ -196,6 +196,23 @@
         show('ok', '✅ E-mail ověřen!',
           'Účet je potvrzený. Vrať se do aplikace Čundr v telefonu a přihlas se — tuhle stránku můžeš zavřít.');
       }
+    })();
+
+    // Tlačítka „Stáhnout" míří rovnou na APK z nejnovějšího GitHub Release.
+    // Jméno souboru obsahuje verzi (cundr-vX.Y.Z.apk), takže se zjišťuje živě
+    // přes GitHub API; když se to nepovede, zůstane odkaz na stránku releasu.
+    (function () {
+      fetch('https://api.github.com/repos/Minsck/cundr-web/releases/latest')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rel) {
+          if (!rel || !rel.assets) return;
+          var apk = rel.assets.find(function (a) { return /\.apk$/i.test(a.name); });
+          if (!apk) return;
+          document.querySelectorAll('a.apk-link').forEach(function (a) {
+            a.href = apk.browser_download_url;
+          });
+        })
+        .catch(function () { /* fallback: odkaz na stránku releasu zůstává */ });
     })();
   </script>
 </body>
