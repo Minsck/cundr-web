@@ -94,6 +94,7 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 20px;
+      text-align: center;
     }
     .card .emoji { font-size: 1.8rem; }
     .card h3 { font-size: 1.05rem; margin: 8px 0 4px; }
@@ -139,6 +140,7 @@
         <h3>Čundr pro Android (APK)</h3>
         <p>Aplikace je ve vývoji — instaluje se zatím ručně přes APK. Verze pro Google Play se chystá.</p>
         <a class="cta apk-link" href="https://github.com/Minsck/cundr-web/releases/latest" style="margin-top:18px">📥 Stáhnout nejnovější APK</a>
+        <span class="cta-note apk-version"></span>
         <span class="cta-note">Zdarma · bez reklam · účet není povinný</span>
         <ol>
           <li>Stáhni APK do telefonu.</li>
@@ -204,12 +206,24 @@
       fetch('https://api.github.com/repos/Minsck/cundr-web/releases/latest')
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (rel) {
-          if (!rel || !rel.assets) return;
-          var apk = rel.assets.find(function (a) { return /\.apk$/i.test(a.name); });
-          if (!apk) return;
-          document.querySelectorAll('a.apk-link').forEach(function (a) {
-            a.href = apk.browser_download_url;
-          });
+          if (!rel) return;
+          // Verze = tag releasu (cundr-web) nebo z názvu APK (cundr-vX.Y.Z.apk).
+          var ver = (rel.tag_name || rel.name || '').replace(/^v/i, '');
+          var apk = (rel.assets || []).find(function (a) { return /\.apk$/i.test(a.name); });
+          if (apk) {
+            if (!ver) {
+              var m = apk.name.match(/v?(\d+\.\d+\.\d+)/i);
+              if (m) ver = m[1];
+            }
+            document.querySelectorAll('a.apk-link').forEach(function (a) {
+              a.href = apk.browser_download_url;
+            });
+          }
+          if (ver) {
+            document.querySelectorAll('.apk-version').forEach(function (el) {
+              el.textContent = 'Aktuální verze: v' + ver;
+            });
+          }
         })
         .catch(function () { /* fallback: odkaz na stránku releasu zůstává */ });
     })();
