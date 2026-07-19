@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Čundr — turistická sociální síť</title>
+  <meta name="description" content="Čundr — plánuj trasy nad mapami Mapy.com, zaznamenávej čundry, sdílej je s kamarády a vyrážejte spolu na výpravy. Zdarma pro Android.">
+  <link rel="icon" href="favicon.png">
+  <style>
+    :root {
+      --blue: #2f80ed;
+      --blue-dark: #1b63c4;
+      --bg: #f4f9ff;
+      --card: #ffffff;
+      --text: #17324d;
+      --muted: #5b7185;
+      --border: #dcebfa;
+      --ok: #1d9a53;
+      --err: #c0392b;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1a26;
+        --card: #172837;
+        --text: #e8f1fa;
+        --muted: #9db4c8;
+        --border: #24405a;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+    /* ===== Banner po ověření e-mailu (plní JS podle URL) ===== */
+    #auth-banner {
+      display: none;
+      padding: 28px 20px;
+      text-align: center;
+      color: #fff;
+    }
+    #auth-banner.ok  { display: block; background: var(--ok); }
+    #auth-banner.err { display: block; background: var(--err); }
+    #auth-banner h2 { font-size: 1.5rem; margin-bottom: 6px; }
+    #auth-banner p  { opacity: .95; max-width: 560px; margin: 0 auto; }
+
+    /* ===== Hero ===== */
+    header {
+      text-align: center;
+      padding: 64px 20px 48px;
+      background: linear-gradient(180deg, rgba(47,128,237,.12), transparent);
+    }
+    header img.logo {
+      width: 112px; height: 112px;
+      border-radius: 26px;
+      box-shadow: 0 8px 30px rgba(47,128,237,.35);
+    }
+    header h1 { font-size: 2.6rem; margin: 18px 0 6px; letter-spacing: -.5px; }
+    header p.tag { font-size: 1.25rem; color: var(--muted); max-width: 620px; margin: 0 auto; }
+    .cta {
+      display: inline-block;
+      margin-top: 28px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 14px 34px;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .cta:hover { background: var(--blue-dark); }
+    .cta-note { display: block; margin-top: 10px; font-size: .85rem; color: var(--muted); }
+
+    /* ===== Sekce ===== */
+    section { padding: 44px 0; }
+    section h2 {
+      text-align: center;
+      font-size: 1.7rem;
+      margin-bottom: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .card .emoji { font-size: 1.8rem; }
+    .card h3 { font-size: 1.05rem; margin: 8px 0 4px; }
+    .card p { font-size: .92rem; color: var(--muted); }
+
+    /* ===== Stažení ===== */
+    #stahnout .card { max-width: 560px; margin: 0 auto; text-align: center; }
+    #stahnout ol {
+      text-align: left;
+      margin: 14px auto 0;
+      max-width: 420px;
+      color: var(--muted);
+      font-size: .92rem;
+      padding-left: 22px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 36px 20px 48px;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--blue); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Sem přistane redirect ze Supabase po kliknutí na ověřovací odkaz v e-mailu. -->
+  <div id="auth-banner" role="status"></div>
+
+  <header>
+    <img class="logo" src="icon.png" alt="Logo Čundr">
+    <h1>Čundr</h1>
+    <p class="tag">Turistická sociální síť. Naplánuj trasu, vyčundruj ji se zapnutým záznamem a poděl se s partou.</p>
+    <a class="cta" href="#stahnout">📥 Stáhnout pro Android</a>
+    <span class="cta-note">Zdarma · bez reklam · účet není povinný</span>
+  </header>
+
+  <div class="wrap">
+    <section>
+      <h2>Co Čundr umí</h2>
+      <div class="grid">
+        <div class="card"><span class="emoji">🗺️</span><h3>Turistické mapy Mapy.com</h3><p>Plánování tras klikáním do mapy s routováním po turistických cestách, výškovým profilem a odhadem času.</p></div>
+        <div class="card"><span class="emoji">🥾</span><h3>Záznam čundru</h3><p>Zapni záznam a projdi trasu — appka počítá kilometry, převýšení i tempo. Ušlé trasy se sčítají do statistik.</p></div>
+        <div class="card"><span class="emoji">🌍</span><h3>Veřejné trasy</h3><p>Sdílej svoje trasy s ostatními, procházej cizí, hodnoť hvězdami, komentuj a přidávej fotky z cesty.</p></div>
+        <div class="card"><span class="emoji">🏕️</span><h3>Výpravy</h3><p>„Jdu to v sobotu, přidej se!" — vyhlas výpravu na trasu, domluvte se ve skupinovém chatu a vyražte spolu.</p></div>
+        <div class="card"><span class="emoji">🧭</span><h3>Navigace</h3><p>Hlasová turn-by-turn navigace po trase v češtině. Upozorní na odbočku i když sejdeš z cesty.</p></div>
+        <div class="card"><span class="emoji">🛖</span><h3>Zajímavá místa</h3><p>Přístřešky, studánky, ohniště, kempy nebo hospody z OpenStreetMap — a vlastní místa od čundráků.</p></div>
+        <div class="card"><span class="emoji">👥</span><h3>Přátelé a chat</h3><p>Přidej si kamarády, koukni na jejich statistiky, piš si s nimi a sdílejte si trasy napřímo.</p></div>
+        <div class="card"><span class="emoji">🏅</span><h3>Body a odznaky</h3><p>Za poctivé kilometry, zveřejněné trasy a povedené fotky sbíráš body a odznaky. Vyhlašujte si výzvy.</p></div>
+        <div class="card"><span class="emoji">📄</span><h3>GPX import a export</h3><p>Trasy si vezmeš odkudkoliv a odneseš kamkoliv — plná podpora GPX souborů.</p></div>
+        <div class="card"><span class="emoji">🆘</span><h3>SOS tlačítko</h3><p>Nouzové tlačítko pošle SMS s tvojí přesnou polohou kontaktním osobám a nabídne volání na 112.</p></div>
+      </div>
+    </section>
+
+    <section id="stahnout">
+      <h2>Stáhnout aplikaci</h2>
+      <div class="card">
+        <span class="emoji">🤖</span>
+        <h3>Čundr pro Android (APK)</h3>
+        <p>Aplikace je ve vývoji — instaluje se zatím ručně přes APK. Verze pro Google Play se chystá.</p>
+        <a class="cta" href="https://github.com/Minsck/cundr-web/releases/latest" style="margin-top:18px">📥 Stáhnout nejnovější APK</a>
+        <ol>
+          <li>Stáhni APK do telefonu.</li>
+          <li>Otevři soubor a povol instalaci z tohoto zdroje, když se telefon zeptá.</li>
+          <li>Hotovo — appka funguje i bez účtu, s účtem se odemkne komunita.</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>Čundr · hobby projekt · <a href="mailto:jan.moucka@eli-beams.eu">kontakt</a></p>
+    <p>Mapové podklady © <a href="https://api.mapy.com/copyright" target="_blank" rel="noopener">Seznam.cz, a.s. a další</a> · Data míst © přispěvatelé OpenStreetMap</p>
+  </footer>
+
+  <script>
+    // Supabase po ověření e-mailu přesměruje na Site URL (tuhle stránku)
+    // s parametry v hashi: úspěch = #access_token=…&type=signup,
+    // chyba = #error=…&error_code=otp_expired&error_description=….
+    (function () {
+      var h = new URLSearchParams(location.hash.replace(/^#/, ''));
+      var q = new URLSearchParams(location.search);
+      var banner = document.getElementById('auth-banner');
+
+      function show(cls, title, msg) {
+        banner.className = cls;
+        banner.innerHTML = '<h2>' + title + '</h2><p>' + msg + '</p>';
+        // Token nenecháváme v adresním řádku (a v historii prohlížeče).
+        history.replaceState(null, '', location.pathname);
+      }
+
+      if (h.get('error') || q.get('error')) {
+        var code = h.get('error_code') || q.get('error_code') || '';
+        var msg = code === 'otp_expired'
+          ? 'Ověřovací odkaz už vypršel. Otevři aplikaci Čundr, zkus se přihlásit a ťukni na „Poslat ověřovací e-mail znovu“.'
+          : 'Ověření se nepovedlo. Otevři aplikaci Čundr a nech si poslat nový ověřovací e-mail.';
+        show('err', '😕 Odkaz nefunguje', msg);
+      } else if (h.get('access_token') || h.get('type') === 'signup' || q.get('code')) {
+        show('ok', '✅ E-mail ověřen!',
+          'Účet je potvrzený. Vrať se do aplikace Čundr v telefonu a přihlas se — tuhle stránku můžeš zavřít.');
+      }
+    })();
+  </script>
+</body>
+</html>
