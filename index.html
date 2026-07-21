@@ -110,6 +110,35 @@
       font-size: .92rem;
       padding-left: 22px;
     }
+    #starsi-verze {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+    #starsi-verze summary {
+      cursor: pointer;
+      color: var(--blue);
+      font-size: .92rem;
+      font-weight: 600;
+    }
+    #starsi-verze ul {
+      list-style: none;
+      margin-top: 12px;
+      text-align: left;
+    }
+    #starsi-verze li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .9rem;
+    }
+    #starsi-verze li:last-child { border-bottom: none; }
+    #starsi-verze li span { color: var(--muted); }
+    #starsi-verze li a { color: var(--blue); text-decoration: none; font-weight: 600; }
+    #starsi-verze li a:hover { text-decoration: underline; }
 
     footer {
       text-align: center;
@@ -147,6 +176,11 @@
           <li>Otevři soubor a povol instalaci z tohoto zdroje, když se telefon zeptá.</li>
           <li>Hotovo — appka funguje i bez účtu, s účtem se odemkne komunita.</li>
         </ol>
+
+        <details id="starsi-verze">
+          <summary>Starší verze ke stažení</summary>
+          <ul id="starsi-verze-list"></ul>
+        </details>
       </div>
     </section>
 
@@ -226,6 +260,46 @@
           }
         })
         .catch(function () { /* fallback: odkaz na stránku releasu zůstává */ });
+    })();
+
+    // Starší verze APK — seznam všech releasů kromě nejnovějšího (ten má
+    // vlastní tlačítko výše). GitHub releases se nemažou, takže APK
+    // zůstávají dostupná ke stažení natrvalo.
+    (function () {
+      fetch('https://api.github.com/repos/Minsck/cundr-web/releases')
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (releases) {
+          var list = document.getElementById('starsi-verze-list');
+          var wrap = document.getElementById('starsi-verze');
+          var older = (releases || []).slice(1).filter(function (rel) {
+            return (rel.assets || []).some(function (a) { return /\.apk$/i.test(a.name); });
+          });
+          if (!older.length) return;
+
+          older.forEach(function (rel) {
+            var apk = rel.assets.find(function (a) { return /\.apk$/i.test(a.name); });
+            var ver = (rel.tag_name || rel.name || '').replace(/^v/i, '');
+            if (!ver) {
+              var m = apk.name.match(/v?(\d+\.\d+\.\d+)/i);
+              ver = m ? m[1] : apk.name;
+            }
+            var d = rel.published_at ? new Date(rel.published_at) : null;
+            var dateStr = d ? d.toLocaleDateString('cs-CZ') : '';
+
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.href = apk.browser_download_url;
+            a.textContent = 'v' + ver;
+            var span = document.createElement('span');
+            span.textContent = dateStr;
+            li.appendChild(a);
+            li.appendChild(span);
+            list.appendChild(li);
+          });
+
+          wrap.style.display = 'block';
+        })
+        .catch(function () { /* starší verze prostě nezobrazíme */ });
     })();
   </script>
 </body>
