@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ochrana soukromí a podmínky — Čundr</title>
+  <meta name="description" content="Jaké údaje aplikace Čundr ukládá, komu se dostanou, jak dlouho se drží a jak je smazat. Plus podmínky používání.">
+  <meta name="theme-color" content="#1b4526">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" href="favicon.png">
+  <style>
+    :root {
+      --green: #1a7f37;
+      --hero-a: #2f6f42;
+      --hero-b: #1b4526;
+      --bg: #f2f5ef;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #666666;
+      --border: #e2e2e2;
+      --badge: rgba(26,127,55,.12);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --green: #4caf50;
+        --bg: #121512;
+        --card: #1e211e;
+        --text: #f0f0f0;
+        --muted: #9aa39a;
+        --border: #333833;
+        --badge: rgba(76,175,80,.16);
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+    header {
+      background: linear-gradient(165deg, var(--hero-a), var(--hero-b));
+      color: #fff; padding: 34px 20px 40px;
+    }
+    header .wrap { display: block; }
+    header a.back {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: rgba(255,255,255,.85); text-decoration: none; font-size: .92rem; font-weight: 600;
+    }
+    header a.back:hover { color: #fff; }
+    header h1 { font-size: 2rem; margin: 16px 0 6px; letter-spacing: -.5px; }
+    header p { color: rgba(255,255,255,.85); font-size: .95rem; }
+    main { padding: 34px 0 20px; }
+    h2 {
+      font-size: 1.3rem; margin: 34px 0 10px; letter-spacing: -.2px;
+      padding-top: 14px; border-top: 1px solid var(--border);
+    }
+    main > .wrap > h2:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+    h3 { font-size: 1rem; margin: 18px 0 4px; }
+    p, li { color: var(--muted); }
+    p { margin-bottom: 10px; }
+    ul, ol { margin: 6px 0 14px 22px; }
+    li { margin: 4px 0; }
+    strong { color: var(--text); }
+    a { color: var(--green); }
+    .box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 20px; margin: 6px 0 20px;
+    }
+    .box ul { margin-bottom: 0; }
+    .tldr { background: var(--badge); border-color: transparent; }
+    .tldr li { color: var(--text); }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 18px; font-size: .93rem; }
+    th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--text); font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+    td { color: var(--muted); }
+    footer {
+      text-align: center; padding: 30px 20px 46px; color: var(--muted);
+      font-size: .85rem; border-top: 1px solid var(--border); margin-top: 30px;
+    }
+    footer a { text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="wrap">
+      <a class="back" href="index.html">← Zpět na Čundr</a>
+      <h1>Ochrana soukromí a podmínky</h1>
+      <p>Platí pro mobilní aplikaci Čundr a tuhle stránku. Poslední úprava 14. 8. 2026.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+
+      <div class="box tldr">
+        <strong>Ve zkratce</strong>
+        <ul>
+          <li>Bez účtu appka neposílá na server <em>nic</em> — mapy, plánování i záznam běží jen v telefonu.</li>
+          <li>Žádné reklamy, žádní inzerenti, žádné prodávání dat. V appce není jediné reklamní ani analytické SDK třetí strany.</li>
+          <li>Každá trasa je ve výchozím stavu soukromá. Co zveřejníš, rozhoduješ ty.</li>
+          <li>Účet i se vším obsahem smažeš přímo v appce — trvale a hned.</li>
+        </ul>
+      </div>
+
+      <h2>Kdo za appkou stojí</h2>
+      <p>Čundr je hobby projekt, ne firma. Správcem osobních údajů je autor aplikace, Jan Moučka.
+        Kontakt: <a href="mailto:jan.moucka@eli-beams.eu">jan.moucka@eli-beams.eu</a> — piš klidně
+        s čímkoli, od reklamace přes dotaz na svoje data až po žádost o smazání.</p>
+
+      <h2>Co appka ukládá</h2>
+      <p>Bez přihlášení se na server neposílá nic. Trasy, které si naplánuješ nebo zaznamenáš,
+        leží jen v telefonu. Jakmile si založíš účet, ukládá se tohle:</p>
+
+      <table>
+        <tr><th>Údaj</th><th>Proč</th></tr>
+        <tr><td><strong>E-mail a heslo</strong></td><td>Přihlášení. Heslo se ukládá jako nevratný otisk, nikdo ho nevidí.</td></tr>
+        <tr><td><strong>Profil</strong> — přezdívka, volitelně avatar (emoji nebo fotka), odkud jsi a co tě na čundrování baví</td><td>Aby tě ostatní poznali. Přezdívku dostaneš náhodnou (<em>cundrak-…</em>), e-mail se nikde neukazuje.</td></tr>
+        <tr><td><strong>Trasy</strong> — body trasy, délka, převýšení, popis, nastavená viditelnost</td><td>Aby ti trasy zůstaly i po přeinstalování a šly sdílet.</td></tr>
+        <tr><td><strong>Záznamy čundrů</strong> — ušlá stopa (GPS), čas, kilometry, převýšení, kolik procent trasy jsi ušel</td><td>Statistiky, body, žebříčky a mapa „co jsem ušel".</td></tr>
+        <tr><td><strong>Obsah, který vytvoříš</strong> — fotky, zážitky, tipy, komentáře, hodnocení, vlastní místa, hlášení o stavu cesty, prvky na trase</td><td>To je vlastní náplň komunity.</td></tr>
+        <tr><td><strong>Zprávy</strong> — osobní chat a chat výprav</td><td>Doručení příjemci. Nejsou koncově šifrované (viz níž).</td></tr>
+        <tr><td><strong>Živá poloha při čundrování</strong></td><td>Jen když si sdílení sám zapneš. Řádek se po skončení čundru smaže a starší dvou minut appka ignoruje.</td></tr>
+        <tr><td><strong>Naposledy viděn</strong></td><td>Stav „online" u přátel. Dá se vypnout v Nastavení.</td></tr>
+        <tr><td><strong>Token pro notifikace</strong></td><td>Aby dorazilo upozornění na zprávu nebo pozvánku. Při odhlášení se maže.</td></tr>
+        <tr><td><strong>Co v appce otevíráš</strong> — které trasy se ti zobrazily, které jsi otevřel, jak dlouho ses v nich zdržel, co jsi hledal</td><td>Aby ti appka nabízela trasy, které dávají smysl. Tyhle řádky <strong>vidíš jen ty</strong>, nikdo jiný se k nim nedostane.</td></tr>
+      </table>
+
+      <h3>Poloha</h3>
+      <p>Polohu appka čte, jen když ji používáš: pro zobrazení tvé pozice na mapě a pro záznam trasy.
+        Na pozadí (se zamčeným telefonem) běží záznam <strong>jen po dobu čundru</strong> — abys nepřišel
+        o konec stopy, když si telefon dáš do kapsy. Když nečundruješ, žádné sledování neběží.</p>
+      <p>Nahrávaná stopa se posílá na server až v okamžiku, kdy čundr uložíš. Živou polohu ostatní vidí
+        jenom tehdy, když si sdílení zapneš, a jen po dobu čundru.</p>
+
+      <h3>SOS</h3>
+      <p>Nouzové tlačítko pošle SMS s tvojí polohou kontaktům, které si sám nastavíš. SMS jde přímo
+        z telefonu přes tvého operátora — nikam se neukládá a neprochází našimi servery.</p>
+
+      <h2>Komu se data dostanou</h2>
+      <p>Neprodáváme a nepředáváme data inzerentům. Na provoz jsou ale potřeba tyhle služby:</p>
+      <table>
+        <tr><th>Služba</th><th>K čemu a co se jí dostane</th></tr>
+        <tr><td><strong>Supabase</strong></td><td>Databáze, účty a úložiště fotek. Leží tu prakticky všechno z tabulky výš.</td></tr>
+        <tr><td><strong>Mapy.com (Seznam.cz)</strong></td><td>Mapové podklady, vyhledávání míst a routování. Dostane se k ní výřez mapy, který si prohlížíš, a body trasy, kterou plánuješ.</td></tr>
+        <tr><td><strong>Google Maps SDK</strong></td><td>Vykreslení mapy v Androidu (podklad kreslí Čundr z Mapy.com).</td></tr>
+        <tr><td><strong>OpenStreetMap (Overpass)</strong></td><td>Zajímavá místa v okolí — dotaz obsahuje výřez mapy.</td></tr>
+        <tr><td><strong>Expo Push Service a Google FCM</strong></td><td>Doručení notifikace do telefonu: token zařízení a text upozornění.</td></tr>
+        <tr><td><strong>GitHub Pages</strong></td><td>Tenhle web a soubor APK ke stažení.</td></tr>
+      </table>
+      <p>Kromě toho v appce <strong>nejsou žádné trackery</strong> — ani reklamní, ani analytické.
+        Jediná „analytika" je vlastní tabulka popsaná výš a její řádky nevidí nikdo než ty.</p>
+
+      <h2>Kdo vidí tvůj obsah</h2>
+      <p>Viditelnost hlídá přímo databáze, ne jen aplikace — obejít se nedá ani úpravou appky.</p>
+      <ul>
+        <li><strong>Trasa</strong>: soukromá (jen ty) · pro přátele · veřejná. Nová trasa je soukromá.</li>
+        <li><strong>Prvky na trase</strong> (hádanky, příběhy, fotky) mají vlastní nastavení viditelnosti.</li>
+        <li><strong>Zprávy</strong> vidí jen odesílatel a příjemce, u výpravy její účastníci.
+          Nejsou koncově šifrované: dokud zpráva na serveru je, technicky je čitelná. Proto jde
+          u konverzace zapnout <strong>mizení zpráv</strong> (1, 3 nebo 7 dní) — server je pak sám maže.</li>
+        <li><strong>Profil a statistiky</strong>: v Nastavení určíš, co z tebe ostatní uvidí.</li>
+        <li><strong>Seznam přátel a poznámky k nim</strong> jsou soukromé vždycky — druhá strana je nevidí.</li>
+        <li><strong>Blokování</strong>: koho zablokuješ, ten ti nenapíše a jeho obsah zmizí z tvého výhledu.</li>
+      </ul>
+
+      <h2>Jak dlouho se to drží</h2>
+      <ul>
+        <li>Obsah účtu — dokud ho nesmažeš ty (nebo celý účet).</li>
+        <li>Údaje o tom, co sis prohlížel — nejobjemnější část (zobrazení karet) se maže po 90 dnech, zbytek po ~13 měsících.</li>
+        <li>Živá poloha při čundrování — smaže se po skončení čundru.</li>
+        <li>Mizející zprávy — podle nastavené doby (1–7 dní).</li>
+        <li>Nahlášení obsahu si necháváme, dokud ho nevyřešíme.</li>
+      </ul>
+
+      <h2>Tvoje práva</h2>
+      <p>Platí ti obvyklá práva podle GDPR: vědět, co o tobě máme, nechat si to opravit, smazat
+        a odnést jinam. Většina jde udělat rovnou v appce:</p>
+      <ul>
+        <li><strong>Přístup a oprava</strong> — Nastavení → profil. Obsah upravíš nebo smažeš tam, kde vznikl.</li>
+        <li><strong>Přenositelnost</strong> — trasy si vyexportuješ do GPX a otevřeš v jakékoli jiné turistické appce.</li>
+        <li><strong>Smazání</strong> — Nastavení → Smazat účet. Smaže účet a kaskádou i trasy, fotky, zprávy,
+          komentáře a všechno ostatní. Je to nevratné a nejde to vzít zpět; fotky z telefonu ti zůstanou.</li>
+        <li>Cokoli dalšího vyřídí <a href="mailto:jan.moucka@eli-beams.eu">e-mail</a>.</li>
+      </ul>
+
+      <h2>Děti a věk</h2>
+      <p>K účtu je potřeba e-mail. U spolucestování (setkávání s lidmi v terénu) appka navíc chce
+        jednorázové potvrzení, že je ti 18 a víc. Mladším čundrákům doporučujeme používat appku
+        s vědomím rodičů.</p>
+
+      <h2>Podmínky používání</h2>
+
+      <h3>Turistika je na vlastní odpovědnost</h3>
+      <p>Čundr je pomůcka, ne průvodce ani záruka. Naplánovaná trasa nemusí být schůdná, most může
+        být stržený, cesta zavřená a odhad času se může splést. Za to, kam vyrazíš a jak se
+        vybavíš, si odpovídáš sám. <strong>SOS tlačítko není tísňová linka</strong> — je to zkratka,
+        jak dát vědět svým lidem a vytočit 112. Nespoléhej na něj jako na jediný záchranný plán:
+        bez signálu SMS neodejde.</p>
+
+      <h3>Obsah</h3>
+      <p>Co nahraješ, zůstává tvoje. Nahráním jen dáváš svolení, aby to appka mohla zobrazit ostatním
+        podle viditelnosti, kterou nastavíš. Nahrávej jen to, k čemu máš práva.</p>
+      <p>Do appky nepatří: cizí obsah bez svolení, urážky a obtěžování, nepravdivá hlášení o stavu
+        cest, reklama, ani místa, jejichž zveřejnění někomu uškodí. Nevhodný obsah jde nahlásit
+        tlačítkem přímo u něj; může být smazán a účet zrušen.</p>
+
+      <h3>Provoz bez záruky</h3>
+      <p>Appka je zdarma a ve vývoji. Může spadnout, může se změnit, může být chvíli nedostupná.
+        Data zálohujeme, ale záruku na jejich zachování dát neumíme — na čem ti záleží,
+        to si vyexportuj do GPX.</p>
+
+      <h3>Změny</h3>
+      <p>Když se tenhle text změní, uvidíš to na datu nahoře. Zásadní změny (typicky nová služba,
+        které se dostanou tvoje data) oznámíme i v appce.</p>
+
+    </div>
+  </main>
+
+  <footer>
+    <p><a href="index.html">Čundr</a> · hobby projekt · <a href="mailto:jan.moucka@eli-beams.eu">kontakt</a></p>
+  </footer>
+
+</body>
+</html>

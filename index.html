@@ -4,9 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Čundr — turistická sociální síť</title>
-  <meta name="description" content="Čundr — naplánuj trasu nad mapami Mapy.com, zaživ ji se záznamem a navigací a poděl se s partou. Zdarma pro Android.">
+  <meta name="description" content="Čundr — naplánuj trasu nad mapami Mapy.com, zaživ ji se záznamem, navigací a dobrodružstvím na trase a poděl se s partou. Zdarma pro Android.">
   <meta name="theme-color" content="#1b4526">
   <link rel="icon" href="favicon.png">
+
+  <!-- Náhled při sdílení odkazu (Messenger, WhatsApp, Facebook). Cesta musí být
+       ABSOLUTNÍ — relativní og:image většina služeb ignoruje. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Čundr">
+  <meta property="og:title" content="Čundr — turistická sociální síť">
+  <meta property="og:description" content="Naplánuj trasu nad mapami Mapy.com, zaživ ji se záznamem a navigací a poděl se s partou. Zdarma pro Android.">
+  <meta property="og:url" content="https://minsck.github.io/cundr-web/">
+  <meta property="og:image" content="https://minsck.github.io/cundr-web/nahled.png">
+  <meta name="twitter:card" content="summary_large_image">
+
   <style>
     /* Barvy vychází z appky (mobile/lib/theme.ts): zelená #1a7f37 / #4caf50,
        podklad #f2f5ef / #121512. Hero je tmavě zelený jako CommunityHeader. */
@@ -16,11 +27,15 @@
       --hero-a: #2f6f42;
       --hero-b: #1b4526;
       --bg: #f2f5ef;
+      --bg-alt: #eaefe6;
       --card: #ffffff;
       --text: #1a1a1a;
       --muted: #666666;
       --border: #e2e2e2;
       --badge: rgba(26,127,55,.12);
+      --shadow: 0 10px 30px rgba(20,40,25,.08);
+      --nav: rgba(242,245,239,.86);
+      --frame: #15171a;
       --ok: #1d9a53;
       --err: #c0392b;
     }
@@ -29,21 +44,27 @@
         --green: #4caf50;
         --green-dark: #3d9241;
         --bg: #121512;
+        --bg-alt: #171a17;
         --card: #1e211e;
         --text: #f0f0f0;
         --muted: #9aa39a;
         --border: #333833;
         --badge: rgba(76,175,80,.16);
+        --shadow: 0 10px 30px rgba(0,0,0,.3);
+        --nav: rgba(18,21,18,.86);
+        --frame: #0b0d0b;
       }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
     }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+    .wrap { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
     .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
     .ic {
       width: 24px; height: 24px;
@@ -53,6 +74,45 @@
       stroke-linecap: round;
       stroke-linejoin: round;
       flex: none;
+    }
+    a { color: var(--green); }
+
+    /* Odhalování sekcí při scrollu. Schovává se JEN tehdy, když skript
+       animaci opravdu zapnul (html.anim) — bez JS, ve starém prohlížeči
+       i při „omezit pohyb" v systému je obsah normálně vidět. */
+    html.anim .reveal { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+    html.anim .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+    /* ===== Horní lišta ===== */
+    nav.top {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--nav);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.top .wrap {
+      display: flex; align-items: center; gap: 18px;
+      height: 60px;
+    }
+    nav.top .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 800; letter-spacing: -.2px;
+      color: var(--text); text-decoration: none; font-size: 1.1rem;
+    }
+    nav.top .brand img { width: 30px; height: 30px; border-radius: 9px; }
+    nav.top .links { margin-left: auto; display: flex; align-items: center; gap: 22px; }
+    nav.top .links a {
+      color: var(--muted); text-decoration: none; font-size: .94rem; font-weight: 600;
+    }
+    nav.top .links a:hover { color: var(--text); }
+    nav.top .links a.nav-cta {
+      background: var(--green); color: #fff;
+      padding: 8px 16px; border-radius: 10px;
+    }
+    nav.top .links a.nav-cta:hover { background: var(--green-dark); color: #fff; }
+    @media (max-width: 720px) {
+      nav.top .links a:not(.nav-cta) { display: none; }
     }
 
     /* ===== Banner po ověření e-mailu (plní JS podle URL) ===== */
@@ -68,35 +128,49 @@
     #auth-banner p  { opacity: .95; max-width: 560px; margin: 0 auto; }
 
     /* ===== Hero (zelený, se siluetou hor — stejný motiv jako v appce) ===== */
-    header {
+    header.hero {
       position: relative;
       overflow: hidden;
-      text-align: center;
-      padding: 66px 20px 96px;
+      padding: 64px 20px 110px;
       background: linear-gradient(165deg, var(--hero-a), var(--hero-b));
       color: #fff;
     }
-    header .hills {
+    header.hero .hills {
       position: absolute;
       left: 0; right: 0; bottom: -1px;
       width: 100%; height: 130px;
       display: block;
     }
     /* var() ve `fill` atributu není všude spolehlivé → barvy siluety řeší CSS. */
-    header .hills .hill-back  { fill: rgba(255,255,255,.07); }
-    header .hills .hill-front { fill: var(--bg); }
-    header .inner { position: relative; z-index: 1; }
-    header img.logo {
-      width: 104px; height: 104px;
-      border-radius: 24px;
+    header.hero .hills .hill-back  { fill: rgba(255,255,255,.07); }
+    header.hero .hills .hill-front { fill: var(--bg); }
+    header.hero .inner {
+      position: relative; z-index: 1;
+      max-width: 1060px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr; gap: 34px;
+      align-items: center; text-align: center;
+      justify-items: center;
+    }
+    /* Dvousloupcový hero má smysl jen se snímkem — třídu dává JS, až se
+       obrázek do rámečku opravdu načte (viz „snímky" na konci souboru). */
+    header.hero.has-shot .inner {
+      grid-template-columns: 1.05fr .95fr;
+      text-align: left;
+      justify-items: start;
+    }
+    @media (max-width: 860px) {
+      header.hero.has-shot .inner { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+    }
+    header.hero img.logo {
+      width: 92px; height: 92px;
+      border-radius: 22px;
       box-shadow: 0 10px 34px rgba(0,0,0,.35);
     }
-    header h1 { font-size: 2.6rem; margin: 18px 0 6px; letter-spacing: -.5px; }
-    header p.tag {
-      font-size: 1.2rem;
-      color: rgba(255,255,255,.86);
+    header.hero h1 { font-size: 3rem; margin: 18px 0 10px; letter-spacing: -1px; line-height: 1.1; }
+    header.hero p.tag {
+      font-size: 1.18rem;
+      color: rgba(255,255,255,.88);
       max-width: 620px;
-      margin: 0 auto;
     }
     .hero-cta {
       display: inline-flex;
@@ -114,17 +188,55 @@
       transition: transform .12s, box-shadow .12s;
     }
     .hero-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(0,0,0,.28); }
-    header .hero-note {
+    header.hero .hero-note {
       display: block;
       margin-top: 12px;
       font-size: .88rem;
       color: rgba(255,255,255,.8);
     }
+    .hero-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 20px; justify-content: center;
+    }
+    header.hero.has-shot .hero-chips { justify-content: flex-start; }
+    @media (max-width: 860px) { header.hero.has-shot .hero-chips { justify-content: center; } }
+    .hero-chips span {
+      font-size: .82rem; font-weight: 600;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.2);
+      color: rgba(255,255,255,.94);
+      padding: 5px 12px; border-radius: 999px;
+    }
+
+    /* ===== Rámeček telefonu (snímky obrazovky) ===== */
+    .phone {
+      display: none;             /* ukáže se, až se snímek načte (JS) */
+      position: relative;
+      width: 100%; max-width: 290px;
+      padding: 10px;
+      background: var(--frame);
+      border-radius: 34px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.32);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .phone.on { display: block; }
+    .phone img {
+      display: block; width: 100%; height: auto;
+      border-radius: 25px;
+      background: #0d0f0d;
+    }
+    .phone::after {   /* sluchátko */
+      content: '';
+      position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+      width: 58px; height: 5px; border-radius: 3px;
+      background: rgba(255,255,255,.22);
+    }
 
     /* ===== Sekce ===== */
-    section { padding: 46px 0; }
-    section h2 { text-align: center; font-size: 1.7rem; margin-bottom: 8px; }
-    section p.lead { text-align: center; color: var(--muted); margin-bottom: 26px; }
+    section { padding: 58px 0; }
+    section > .wrap > h2, section h2.center { text-align: center; font-size: 1.85rem; letter-spacing: -.4px; }
+    section p.lead { text-align: center; color: var(--muted); margin: 6px auto 30px; max-width: 620px; }
+    .band { background: var(--bg-alt); }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -162,13 +274,151 @@
       margin-bottom: 2px;
     }
 
+    /* ===== Rozvedené funkce (text + snímek vedle sebe) ===== */
+    .feature-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 34px;
+      align-items: center;
+      padding: 26px 0;
+    }
+    .feature-row + .feature-row { border-top: 1px solid var(--border); }
+    /* Sloupec se snímkem je skrytý, dokud se obrázek nenačte — display:none
+       není mřížková položka, takže řádek se sám roztáhne na celou šířku
+       a nezůstane po něm prázdná půlka. */
+    .feature-row .shot { display: none; justify-content: center; }
+    .feature-row .shot.on { display: flex; }
+    .feature-row.flip .txt { order: 2; }
+    @media (max-width: 780px) { .feature-row.flip .txt { order: 0; } }
+    .feature-row .kicker {
+      display: inline-block;
+      font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--green); background: var(--badge);
+      padding: 3px 10px; border-radius: 999px; margin-bottom: 10px;
+    }
+    .feature-row h3 { font-size: 1.5rem; letter-spacing: -.3px; margin-bottom: 8px; }
+    .feature-row p { color: var(--muted); }
+    .feature-row ul { margin: 14px 0 0; padding-left: 0; list-style: none; }
+    .feature-row li {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 5px 0; font-size: .95rem;
+    }
+    .feature-row li svg { width: 19px; height: 19px; color: var(--green); margin-top: 4px; }
+
+    /* ===== Galerie snímků ===== */
+    #galerie { display: none; }         /* zapne JS, až se snímky načtou */
+    .strip {
+      display: flex; gap: 16px;
+      overflow-x: auto;
+      padding: 6px 20px 20px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .strip::-webkit-scrollbar { height: 8px; }
+    .strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .strip figure {
+      flex: 0 0 auto; width: 230px;
+      scroll-snap-align: center;
+      cursor: zoom-in;
+    }
+    .strip .phone { max-width: 230px; padding: 7px; border-radius: 26px; }
+    .strip .phone img { border-radius: 19px; }
+    .strip .phone::after { top: 13px; width: 44px; height: 4px; }
+    .strip figcaption {
+      text-align: center; font-size: .85rem; color: var(--muted);
+      margin-top: 10px;
+    }
+
+    /* Lightbox */
+    #lb {
+      display: none;
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,.88);
+      align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    #lb.on { display: flex; }
+    #lb img { max-width: 100%; max-height: 86vh; border-radius: 14px; }
+    #lb .cap {
+      position: absolute; bottom: 22px; left: 0; right: 0;
+      text-align: center; color: #fff; font-size: .95rem;
+    }
+    #lb button {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,.14); color: #fff;
+      border: none; width: 46px; height: 46px; border-radius: 50%;
+      font-size: 1.6rem; cursor: pointer; line-height: 1;
+    }
+    #lb button:hover { background: rgba(255,255,255,.26); }
+    #lb .prev { left: 14px; }
+    #lb .next { right: 14px; }
+    #lb .close { top: 16px; right: 16px; transform: none; font-size: 1.2rem; }
+
+    /* ===== Video ===== */
+    #video { display: none; }           /* zapne JS, až soubor na serveru je */
+    #video .box {
+      max-width: 720px; margin: 0 auto;
+      border-radius: 18px; overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: #000;
+    }
+    #video video { display: block; width: 100%; height: auto; }
+
+    /* ===== Co je nového ===== */
+    #novinky { display: none; }
+    #novinky .box {
+      max-width: 720px; margin: 0 auto;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 22px 24px;
+    }
+    #novinky .ver {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    #novinky .ver strong {
+      background: var(--badge); color: var(--green);
+      padding: 3px 12px; border-radius: 999px; font-size: .9rem;
+    }
+    #novinky .ver span { color: var(--muted); font-size: .9rem; }
+    #novinky ul { list-style: none; }
+    #novinky li {
+      position: relative; padding-left: 22px; margin: 9px 0;
+      font-size: .95rem; color: var(--muted);
+    }
+    #novinky li::before {
+      content: ''; position: absolute; left: 4px; top: .68em;
+      width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    }
+    #novinky li strong { color: var(--text); }
+    #novinky .all { display: block; text-align: center; margin-top: 16px; font-size: .9rem; }
+
+    /* ===== FAQ ===== */
+    #faq .box { max-width: 760px; margin: 0 auto; }
+    #faq details {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 4px 18px; margin-bottom: 10px;
+    }
+    #faq summary {
+      cursor: pointer; list-style: none;
+      font-weight: 650; padding: 13px 0;
+      display: flex; align-items: center; gap: 10px;
+    }
+    #faq summary::-webkit-details-marker { display: none; }
+    #faq summary::after {
+      content: '+'; margin-left: auto; color: var(--green);
+      font-size: 1.3rem; font-weight: 400; line-height: 1;
+    }
+    #faq details[open] summary::after { content: '–'; }
+    #faq details p { color: var(--muted); font-size: .94rem; padding: 0 0 14px; }
+    #faq details p + p { padding-top: 0; }
+
     /* ===== Stažení ===== */
-    #stahnout { padding-top: 38px; }
     #stahnout .card {
       max-width: 580px;
       margin: 0 auto;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,.07);
+      box-shadow: var(--shadow);
     }
     #stahnout .badge { margin: 0 auto 12px; }
     .cta {
@@ -196,6 +446,7 @@
       font-size: .92rem;
       padding-left: 22px;
     }
+    #stahnout ol li { padding: 3px 0; }
     #starsi-verze {
       margin-top: 18px;
       padding-top: 16px;
@@ -226,19 +477,37 @@
 
     footer {
       text-align: center;
-      padding: 36px 20px 48px;
+      padding: 40px 20px 52px;
       color: var(--muted);
       font-size: .85rem;
       border-top: 1px solid var(--border);
     }
     footer a { color: var(--green); text-decoration: none; }
+    footer p + p { margin-top: 6px; }
 
     @media (max-width: 560px) {
-      header { padding: 48px 20px 84px; }
-      header h1 { font-size: 2.1rem; }
-      header p.tag { font-size: 1.05rem; }
+      header.hero { padding: 44px 20px 96px; }
+      header.hero h1 { font-size: 2.2rem; }
+      header.hero p.tag { font-size: 1.05rem; }
+      section { padding: 44px 0; }
+      section > .wrap > h2, section h2.center { font-size: 1.55rem; }
     }
   </style>
+
+  <script>
+    // Animaci „odhalení při scrollu" zapínáme jen tam, kde ji umíme dotáhnout
+    // do konce (IntersectionObserver + uživatel nemá zapnuté omezení pohybu).
+    // Třída se dává hned v <head> — kdyby ji přidával až skript na konci
+    // stránky, obsah by nejdřív probliknul a teprve pak zmizel do fade-inu.
+    (function () {
+      try {
+        if ('IntersectionObserver' in window &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('anim');
+        }
+      } catch (e) { /* starý prohlížeč → prostě bez animace */ }
+    })();
+  </script>
 </head>
 <body>
 
@@ -307,81 +576,198 @@
         <path d="M12 3.5v11M12 14.5 8 10.5M12 14.5l4-4"/>
         <path d="M4 16.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-2.5"/>
       </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M8.2 12.3 11 15l4.8-5.4"/>
+      </symbol>
+      <symbol id="i-gpx" viewBox="0 0 24 24">
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/>
+        <path d="M14 3v5h5"/>
+        <path d="M8.6 16.4c1.6-1.2 2-3.6 3.4-3.6s1.8 2.4 3.4 1.2"/>
+      </symbol>
     </defs>
   </svg>
 
   <!-- Sem přistane redirect ze Supabase po kliknutí na ověřovací odkaz v e-mailu. -->
   <div id="auth-banner" role="status"></div>
 
-  <header>
+  <nav class="top">
+    <div class="wrap">
+      <a class="brand" href="#top">
+        <img src="icon.png" alt="">
+        Čundr
+      </a>
+      <div class="links">
+        <a href="#vrstvy">Jak to chodí</a>
+        <a href="#funkce">Funkce</a>
+        <a href="#galerie" class="nav-galerie" hidden>Snímky</a>
+        <a href="#faq">Otázky</a>
+        <a href="#stahnout" class="nav-cta">Stáhnout</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
     <svg class="hills" viewBox="0 0 1200 130" preserveAspectRatio="none" aria-hidden="true">
       <path class="hill-back" d="M0 130 L0 92 L150 44 L268 96 L392 30 L560 108 L700 62 L860 104 L1000 48 L1120 96 L1200 66 L1200 130 Z"/>
       <path class="hill-front" d="M0 130 L0 110 L190 74 L340 112 L520 66 L690 116 L880 78 L1040 116 L1200 88 L1200 130 Z"/>
     </svg>
     <div class="inner">
-      <img class="logo" src="icon.png" alt="Logo Čundr">
-      <h1>Čundr</h1>
-      <p class="tag">Turistická sociální síť. Naplánuj trasu, zaživ ji se záznamem a navigací a poděl se s partou.</p>
-      <a class="hero-cta apk-link" href="cundr-latest.apk">
-        <svg class="ic"><use href="#i-download"></use></svg>
-        Stáhnout pro Android
-      </a>
-      <span class="hero-note apk-version"></span>
+      <div>
+        <img class="logo" src="icon.png" alt="Logo Čundr">
+        <h1>Trasa, kterou si zapamatuješ</h1>
+        <p class="tag">Čundr je turistická sociální síť. Naplánuj trasu nad mapami Mapy.com, zaživ ji se záznamem, hlasovou navigací a dobrodružstvím na cestě — a poděl se s partou.</p>
+        <a class="hero-cta apk-link" href="cundr-latest.apk">
+          <svg class="ic"><use href="#i-download"></use></svg>
+          Stáhnout pro Android
+        </a>
+        <span class="hero-note apk-version"></span>
+        <div class="hero-chips">
+          <span>Zdarma</span>
+          <span>Bez reklam</span>
+          <span>České turistické mapy</span>
+          <span>Funguje i bez účtu</span>
+        </div>
+      </div>
+      <div class="phone" data-shot="snimky/mapa-planovani.jpg">
+        <img src="snimky/mapa-planovani.jpg" alt="Plánování trasy v aplikaci Čundr" loading="eager">
+      </div>
     </div>
   </header>
 
-  <div class="wrap">
-    <section id="stahnout">
-      <div class="card">
-        <div class="badge"><svg class="ic"><use href="#i-download"></use></svg></div>
-        <h3>Čundr pro Android (APK)</h3>
-        <p>Aplikace je ve vývoji — instaluje se zatím ručně přes APK. Verze pro Google Play se chystá.</p>
-        <a class="cta apk-link" href="cundr-latest.apk">
-          <svg class="ic"><use href="#i-download"></use></svg>
-          Stáhnout nejnovější APK
-        </a>
-        <span class="cta-note apk-version"></span>
-        <span class="cta-note">Zdarma · bez reklam · účet není povinný</span>
-        <ol>
-          <li>Stáhni APK do telefonu.</li>
-          <li>Otevři soubor a povol instalaci z tohoto zdroje, když se telefon zeptá.</li>
-          <li>Hotovo — appka funguje i bez účtu, s účtem se odemkne komunita.</li>
-        </ol>
-
-        <details id="starsi-verze">
-          <summary>Starší verze ke stažení</summary>
-          <ul id="starsi-verze-list"></ul>
-        </details>
-      </div>
-    </section>
-
-    <section id="vrstvy">
+  <section id="vrstvy">
+    <div class="wrap">
       <h2>Jak to chodí</h2>
-      <p class="lead">Tři vrstvy appky, mezi kterými přepínáš bočním menu.</p>
+      <p class="lead">Appka má tři vrstvy a přepínáš mezi nimi bočním menu — podle toho, jestli zrovna plánuješ, jsi na cestě, nebo se vracíš mezi lidi.</p>
       <div class="grid">
-        <div class="card">
+        <div class="card reveal">
           <div class="badge"><svg class="ic"><use href="#i-map"></use></svg></div>
           <span class="step">1 · Naplánuj</span>
           <h3>Mapa a plánování</h3>
-          <p>Naklikej trasu po turistických cestách nebo ji nakresli od ruky. Přidej k ní prvky, ulož a zveřejni.</p>
+          <p>Naklikej trasu po turistických cestách nebo ji nakresli od ruky. Uvidíš délku, převýšení i odhad času, přidáš k trase prvky a uložíš si ji.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <div class="badge"><svg class="ic"><use href="#i-flame"></use></svg></div>
           <span class="step">2 · Zaživ</span>
           <h3>Dobrodružství</h3>
-          <p>Vyraž s navigací a záznamem. Cestou se hlásí, co tě čeká, kdo je poblíž a jestli to stihneš za světla.</p>
+          <p>Vyraž s navigací a záznamem. Cestou se hlásí, co tě čeká, kdo je poblíž a jestli to stihneš za světla. Na konci víš, kolik jsi doopravdy ušel.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <div class="badge"><svg class="ic"><use href="#i-people"></use></svg></div>
           <span class="step">3 · Sděl</span>
           <h3>Komunita</h3>
-          <p>Zážitek s fotkami do feedu, tipy na výlet, hledání parťáků a chat s přáteli.</p>
+          <p>Zážitek s fotkami na zeď, tipy na výlet, hledání parťáků a chat s přáteli. Nové příspěvky se objeví ostatním do vteřiny.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section id="funkce">
-      <h2>Co Čundr umí</h2>
+  <section class="band" id="podrobne">
+    <div class="wrap">
+      <h2 class="center">Co Čundr umí pořádně</h2>
+      <p class="lead">Čtyři věci, kvůli kterým vzniknul.</p>
+
+      <div class="feature-row reveal">
+        <div class="txt">
+          <span class="kicker">Plánování</span>
+          <h3>Trasa přesně po turistických značkách</h3>
+          <p>Klikáš do mapy a Čundr mezi body vede cestu po skutečných turistických cestách — ne vzdušnou čarou. Hned vidíš, co tě čeká.</p>
+          <ul>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Výškový profil s převýšením a odhadem času podle tvého tempa</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Devět map: turistická, základní, letecká, zimní i venkovní</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Kreslení od ruky, když chceš jít mimo cesty</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Import a export GPX — trasy z jiných appek se neztratí</li>
+          </ul>
+        </div>
+        <div class="shot">
+          <div class="phone" data-shot="snimky/planovani-profil.jpg">
+            <img src="snimky/planovani-profil.jpg" alt="Výškový profil naplánované trasy" loading="lazy">
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-row flip reveal">
+        <div class="txt">
+          <span class="kicker">Na cestě</span>
+          <h3>Navigace, která mluví česky</h3>
+          <p>Zapneš dobrodružství a jdeš. Appka hlásí odbočky hlasem, upozorní, když sejdeš z trasy, a průběžně počítá, kolik ti zbývá — i se zamčeným telefonem.</p>
+          <ul>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Záznam stopy na pozadí: kilometry, převýšení, tempo</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Hlídá, jestli to stihneš za světla — počítá se západem slunce</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Hlásí dopředu, co je na trase: prameny, přístřešky, výhledy</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Na konci ukáže, kolik procent trasy jsi opravdu ušel</li>
+          </ul>
+        </div>
+        <div class="shot">
+          <div class="phone" data-shot="snimky/navigace.jpg">
+            <img src="snimky/navigace.jpg" alt="Hlasová navigace po trase" loading="lazy">
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-row reveal">
+        <div class="txt">
+          <span class="kicker">Dobrodružství</span>
+          <h3>Z čáry na mapě je hra</h3>
+          <p>K libovolnému bodu trasy přivěsíš hádanku, výzvu, příběh, vtip, fotku, video nebo vzkaz. Kdo tudy půjde, tomu se to na místě samo otevře — příběh se dokonce vypisuje rychlostí čtení.</p>
+          <ul>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Hádanka s polem na odpověď — za vyřešení jsou body</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Prvky vidí jen ty, přátelé, nebo celý svět — jak nastavíš</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Ideální na výlet s dětmi nebo trasu připravenou pro kamaráda</li>
+          </ul>
+        </div>
+        <div class="shot">
+          <div class="phone" data-shot="snimky/prvek-hadanka.jpg">
+            <img src="snimky/prvek-hadanka.jpg" alt="Hádanka na trase" loading="lazy">
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-row flip reveal">
+        <div class="txt">
+          <span class="kicker">Komunita</span>
+          <h3>Parta, co chodí ven</h3>
+          <p>Zeď s příspěvky, tipy na výlet, výzvy a spolucestování. Trasy ti Čundr nabízí podle kvality i podle toho, jak daleko od tebe jsou.</p>
+          <ul>
+            <li><svg class="ic"><use href="#i-check"></use></svg> „Jdu to v sobotu, přidej se" — termín, skupinový chat, kapacita</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Body v pěti kategoriích, denní série, odznaky a žebříčky mezi přáteli</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Chat s fotkami, videi a sdílením tras; zprávy můžou samy mizet</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Nový příspěvek i komentář se ostatním objeví do vteřiny</li>
+          </ul>
+        </div>
+        <div class="shot">
+          <div class="phone" data-shot="snimky/komunita.jpg">
+            <img src="snimky/komunita.jpg" alt="Zeď komunity v aplikaci Čundr" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="galerie">
+    <div class="wrap">
+      <h2 class="center">Jak to vypadá</h2>
+      <p class="lead">Snímky přímo z telefonu. Ťukni pro zvětšení.</p>
+    </div>
+    <div class="strip" id="strip"></div>
+  </section>
+
+  <section id="video" class="band">
+    <div class="wrap">
+      <h2 class="center">Čundr v pohybu</h2>
+      <p class="lead">Krátká ukázka: od naplánování trasy až po vyražení ven.</p>
+      <div class="box">
+        <video controls playsinline preload="none" poster="video/ukazka-nahled.jpg">
+          <source src="video/ukazka.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </section>
+
+  <section id="funkce">
+    <div class="wrap">
+      <h2>Všechno, co v Čundru najdeš</h2>
+      <p class="lead">Appka se vyvíjí každý týden — tohle je stav dneška.</p>
       <div class="grid">
         <div class="card">
           <div class="badge"><svg class="ic"><use href="#i-map"></use></svg></div>
@@ -391,7 +777,7 @@
         <div class="card">
           <div class="badge"><svg class="ic"><use href="#i-boot"></use></svg></div>
           <h3>Záznam cesty</h3>
-          <p>Zapni záznam a jdi — appka počítá kilometry, převýšení i tempo a hlídá, jestli to stihneš za světla. Import i export GPX.</p>
+          <p>Zapni záznam a jdi — appka počítá kilometry, převýšení i tempo a hlídá, jestli to stihneš za světla. Jde i volný čundr bez naplánované trasy.</p>
         </div>
         <div class="card">
           <div class="badge"><svg class="ic"><use href="#i-sign"></use></svg></div>
@@ -416,7 +802,7 @@
         <div class="card">
           <div class="badge"><svg class="ic"><use href="#i-live"></use></svg></div>
           <h3>Živá komunita</h3>
-          <p>Feed toho, co se právě děje: kdo kam vyráží, co kdo prošel, čerstvé zážitky. Trasy ti nabízí podle kvality i vzdálenosti od tvého okolí.</p>
+          <p>Zeď toho, co se právě děje: kdo kam vyráží, co kdo prošel, čerstvé zážitky. Trasy ti nabízí podle kvality i vzdálenosti od tvého okolí.</p>
         </div>
         <div class="card">
           <div class="badge"><svg class="ic"><use href="#i-bulb"></use></svg></div>
@@ -439,6 +825,11 @@
           <p>Body v pěti kategoriích — za nachozené, za věrnost, za vyřešené hádanky, za tvorbu tras i za komunitu. K tomu série dní, odznaky a trofeje.</p>
         </div>
         <div class="card">
+          <div class="badge"><svg class="ic"><use href="#i-gpx"></use></svg></div>
+          <h3>Import a export GPX</h3>
+          <p>Trasu z jiné appky si nahraješ do Čundru a svoje trasy dostaneš zase ven. Data zůstávají tvoje.</p>
+        </div>
+        <div class="card">
           <div class="badge"><svg class="ic"><use href="#i-sos"></use></svg></div>
           <h3>SOS tlačítko</h3>
           <p>Nouzové tlačítko pošle SMS s přesnou polohou kontaktním osobám a nabídne volání na 112.</p>
@@ -449,11 +840,105 @@
           <p>Každou trasu zveřejníš, jen když chceš — soukromě, přátelům, nebo veřejně. Blokování, nahlašování obsahu, export i smazání účtu jsou v appce.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
+
+  <section id="novinky" class="band">
+    <div class="wrap">
+      <h2 class="center">Co je nového</h2>
+      <p class="lead">Poslední vydaná verze a co přinesla.</p>
+      <div class="box">
+        <div class="ver"></div>
+        <ul></ul>
+        <a class="all" href="https://github.com/Minsck/cundr-web/releases" target="_blank" rel="noopener">Všechny verze a jejich změny →</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <h2 class="center">Časté otázky</h2>
+      <div class="box">
+        <details>
+          <summary>Kolik to stojí?</summary>
+          <p>Nic. Čundr je hobby projekt — bez reklam, bez placených funkcí, bez sledování na míru inzerentům. Nemusíš nic kupovat, abys appku používal naplno.</p>
+        </details>
+        <details>
+          <summary>Proč se instaluje APK a ne z Google Play?</summary>
+          <p>Aplikace je pořád ve vývoji a vydání do Google Play se teprve chystá. Do té doby se instaluje ručně: stáhneš soubor APK z téhle stránky, otevřeš ho v telefonu a povolíš instalaci z tohoto zdroje. Telefon se na to zeptá jen jednou.</p>
+          <p>Je to normální postup u aplikací mimo obchod. Soubor je vždycky ten, který sem nahrajeme my — nikde jinde ho nesháněj.</p>
+        </details>
+        <details>
+          <summary>Funguje appka bez účtu?</summary>
+          <p>Ano. Mapy, plánování trasy, záznam, navigace i GPX fungují rovnou po instalaci. Účet (e-mail a heslo) odemyká komunitu: sdílení tras, zeď, chat, přátele, výpravy a body.</p>
+        </details>
+        <details>
+          <summary>Funguje to bez signálu?</summary>
+          <p>Záznam stopy jede z GPS, takže bez signálu měří dál. Trasa, kterou máš uloženou v telefonu, se ukáže i offline, včetně navigace po ní.</p>
+          <p>Mapové podklady se ale stahují z internetu — v místech bez signálu se nová část mapy nenačte. Stažené offline mapy jsou v plánu, zatím nejsou hotové.</p>
+        </details>
+        <details>
+          <summary>Kdo uvidí moje trasy?</summary>
+          <p>Rozhoduješ u každé trasy zvlášť: soukromá (jen ty), pro přátele, nebo veřejná. Nová trasa je ve výchozím stavu soukromá — nic se nezveřejní samo.</p>
+          <p>V nastavení navíc určíš, co z tvého profilu ostatní vidí, a živou polohu při čundrování sdílíš jen tehdy, když si to zapneš.</p>
+        </details>
+        <details>
+          <summary>Jak je to s mými daty?</summary>
+          <p>Účet, trasy a fotky leží na serveru (Supabase) a přístup k nim hlídá databáze, ne jen aplikace. Trasy si kdykoli vyexportuješ do GPX a účet i se vším obsahem smažeš přímo v appce.</p>
+          <p>Podrobnosti: <a href="soukromi.html">Ochrana soukromí</a>.</p>
+        </details>
+        <details>
+          <summary>Sežere mi to baterku?</summary>
+          <p>Záznam trasy drží GPS zapnuté, takže spotřeba je znát — jako u každé navigace. Když nečundruješ, appka na pozadí polohu nesleduje. Na delší túru se hodí powerbanka.</p>
+        </details>
+        <details>
+          <summary>Bude verze pro iPhone?</summary>
+          <p>Zatím ne. Aplikace je psaná tak, aby to jednou šlo, ale sestavená a otestovaná je jen pro Android.</p>
+        </details>
+        <details>
+          <summary>Našel jsem chybu / mám nápad</summary>
+          <p>Napiš na <a href="mailto:jan.moucka@eli-beams.eu">jan.moucka@eli-beams.eu</a>. Reklamace z terénu jsou nejcennější věc, co může přijít — většina posledních oprav vznikla přesně takhle.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="stahnout">
+    <div class="wrap">
+      <div class="card">
+        <div class="badge"><svg class="ic"><use href="#i-download"></use></svg></div>
+        <h3>Čundr pro Android (APK)</h3>
+        <p>Aplikace je ve vývoji — instaluje se zatím ručně přes APK. Verze pro Google Play se chystá.</p>
+        <a class="cta apk-link" href="cundr-latest.apk">
+          <svg class="ic"><use href="#i-download"></use></svg>
+          Stáhnout nejnovější APK
+        </a>
+        <span class="cta-note apk-version"></span>
+        <span class="cta-note">Zdarma · bez reklam · účet není povinný</span>
+        <ol>
+          <li>Stáhni APK do telefonu.</li>
+          <li>Otevři soubor a povol instalaci z tohoto zdroje, když se telefon zeptá.</li>
+          <li>Hotovo — appka funguje i bez účtu, s účtem se odemkne komunita.</li>
+        </ol>
+
+        <details id="starsi-verze">
+          <summary>Starší verze ke stažení</summary>
+          <ul id="starsi-verze-list"></ul>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <div id="lb" role="dialog" aria-modal="true" aria-label="Zvětšený snímek">
+    <button class="close" aria-label="Zavřít">✕</button>
+    <button class="prev" aria-label="Předchozí">‹</button>
+    <img alt="">
+    <button class="next" aria-label="Další">›</button>
+    <div class="cap"></div>
   </div>
 
   <footer>
-    <p>Čundr · hobby projekt · <a href="mailto:jan.moucka@eli-beams.eu">kontakt</a></p>
+    <p>Čundr · hobby projekt · <a href="mailto:jan.moucka@eli-beams.eu">kontakt</a> · <a href="soukromi.html">ochrana soukromí</a></p>
     <p>Mapové podklady © <a href="https://api.mapy.com/copyright" target="_blank" rel="noopener">Seznam.cz, a.s. a další</a> · Data míst © přispěvatelé OpenStreetMap</p>
   </footer>
 
@@ -487,7 +972,7 @@
 
     // Verze APK se čtou ŽIVĚ z GitHub Releases (repo cundr-web), takže se web
     // po vydání nové verze nemusí nasazovat znovu. Jedním dotazem se obslouží
-    // i popisek verze u tlačítka, i seznam starších verzí.
+    // popisek verze u tlačítka, seznam starších verzí i sekce „Co je nového".
     // Releases se nikdy nemažou → starší APK zůstávají ke stažení natrvalo.
     //
     // TLAČÍTKO „STÁHNOUT" ALE NA RELEASE NEMÍŘÍ (14.8.2026, reklamace uživatele
@@ -498,7 +983,8 @@
     // nemá kam vrátit. Soubor proto leží VEDLE TÉHLE STRÁNKY
     // (cundr-latest.apk na GitHub Pages): stejný server, žádné přesměrování,
     // žádný token, žádné vypršení. Nahrává ho `web/vydej.ps1` při vydání verze.
-    // `?v=` je jen proti cache CDN, na jméno souboru nemá vliv.
+    // `?v=` je jen proti cache CDN; jméno STAŽENÉHO souboru (s verzí) řeší
+    // atribut `download`, který se dopisuje níž.
     // Starší verze zůstávají na Releases — jsou archiv, ne hlavní cesta.
     (function () {
       function verOf(rel, apk) {
@@ -519,6 +1005,29 @@
         return new Date(iso).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
       }
 
+      // Popis vydání je náš vlastní text z releases/POZNAMKY-vX.Y.Z.md (odrážky
+      // „- **tučně** — zbytek"). Renderuje se RUČNĚ a přes textContent, takže
+      // ani kdyby se do popisu jednou dostalo HTML, nic se nespustí.
+      function odrazky(body) {
+        return (body || '').split('\n')
+          .map(function (l) { return l.trim(); })
+          .filter(function (l) { return /^[-*]\s+/.test(l); })
+          .map(function (l) { return l.replace(/^[-*]\s+/, ''); });
+      }
+      function tucne(text, li) {
+        // **takhle** → <strong>, zbytek jako čistý text.
+        text.split(/(\*\*[^*]+\*\*)/).forEach(function (kus) {
+          if (!kus) return;
+          if (/^\*\*[^*]+\*\*$/.test(kus)) {
+            var b = document.createElement('strong');
+            b.textContent = kus.slice(2, -2);
+            li.appendChild(b);
+          } else {
+            li.appendChild(document.createTextNode(kus));
+          }
+        });
+      }
+
       fetch('https://api.github.com/repos/Minsck/cundr-web/releases?per_page=30')
         .then(function (r) { return r.ok ? r.json() : []; })
         .then(function (releases) {
@@ -532,6 +1041,14 @@
 
           document.querySelectorAll('a.apk-link').forEach(function (a) {
             a.href = 'cundr-latest.apk' + (ver ? '?v=' + encodeURIComponent(ver) : '');
+            // ULOŽIT SE MÁ S VERZÍ (22.8.2026, reklamace „když ji stahuju, tak
+            // chci mít v názvu souboru i verzi"). Soubor na Pages se jmenuje
+            // pořád stejně, takže bez tohohle končí ve stahování hromada
+            // cundr-latest(1).apk, cundr-latest(2).apk… a nepozná se, co je co.
+            // `download` přejmenování zařídí, protože soubor leží na STEJNÉM
+            // původu jako stránka (u cizí domény by prohlížeč atribut ignoroval
+            // — právě proto to jde až tady, ne u odkazů na release assety).
+            if (ver) a.setAttribute('download', 'cundr-v' + ver + '.apk');
           });
           document.querySelectorAll('.apk-version').forEach(function (el) {
             el.innerHTML = 'Verze <strong>v' + ver + '</strong>' +
@@ -539,6 +1056,28 @@
                 ? ' · vydáno ' + datum(latest.published_at) + ' v ' + cas(latest.published_at)
                 : '');
           });
+
+          // --- co je nového: odrážky z popisu posledního vydání ---
+          var body = odrazky(latest.body);
+          if (body.length) {
+            var sek = document.getElementById('novinky');
+            var hlav = sek.querySelector('.ver');
+            var b = document.createElement('strong');
+            b.textContent = 'v' + ver;
+            hlav.appendChild(b);
+            if (latest.published_at) {
+              var s = document.createElement('span');
+              s.textContent = 'vydáno ' + datum(latest.published_at);
+              hlav.appendChild(s);
+            }
+            var ul = sek.querySelector('ul');
+            body.slice(0, 8).forEach(function (radek) {
+              var li = document.createElement('li');
+              tucne(radek, li);
+              ul.appendChild(li);
+            });
+            sek.style.display = 'block';
+          }
 
           // --- starší verze: jen datum vydání ---
           var list = document.getElementById('starsi-verze-list');
@@ -561,6 +1100,141 @@
           wrap.style.display = 'block';
         })
         .catch(function () { /* fallback: odkazy míří na stránku releasů */ });
+    })();
+
+    // SNÍMKY OBRAZOVKY. Rámečky telefonu jsou v HTML skryté (`.phone` má
+    // display:none) a ukážou se, TEPRVE až se obrázek opravdu načte — chybějící
+    // snímek tak nikdy neudělá na stránce prázdné místo ani rozbitou ikonu.
+    // Galerie se skládá z pole níž; stačí přidat řádek a soubor do web/snimky/.
+    (function () {
+      var GALERIE = [
+        ['snimky/mapa-planovani.jpg', 'Plánování trasy'],
+        ['snimky/planovani-profil.jpg', 'Výškový profil a odhad času'],
+        ['snimky/dobrodruzstvi.jpg', 'Dobrodružství: záznam a HUD'],
+        ['snimky/navigace.jpg', 'Hlasová navigace'],
+        ['snimky/prvek-hadanka.jpg', 'Hádanka na trase'],
+        ['snimky/mista.jpg', 'Zajímavá místa v okolí'],
+        ['snimky/komunita.jpg', 'Zeď komunity'],
+        ['snimky/detail-trasy.jpg', 'Detail trasy'],
+        ['snimky/profil.jpg', 'Profil, body a odznaky'],
+        ['snimky/chat.jpg', 'Chat s přáteli'],
+        ['snimky/spolucestovani.jpg', 'Spolucestování'],
+      ];
+
+      // Rámečky rozeseté po stránce (hero + rozvedené funkce).
+      document.querySelectorAll('.phone[data-shot]').forEach(function (ram) {
+        var img = ram.querySelector('img');
+        if (!img) return;
+        var hotovo = function () {
+          ram.classList.add('on');
+          var sloupec = ram.closest('.shot');
+          if (sloupec) sloupec.classList.add('on');
+          var hero = ram.closest('header.hero');
+          if (hero) hero.classList.add('has-shot');
+        };
+        if (img.complete) { if (img.naturalWidth) hotovo(); }
+        else { img.addEventListener('load', hotovo); }
+      });
+
+      // Galerie: figury se založí ROVNOU v pořadí podle pole a jsou skryté
+      // (`hidden`); odkryje je až úspěšné načtení obrázku. Pořadí tím nezávisí
+      // na tom, který soubor dorazí ze serveru dřív, a chybějící snímek prostě
+      // zůstane schovaný.
+      var strip = document.getElementById('strip');
+      var sekce = document.getElementById('galerie');
+      var odkaz = document.querySelector('.nav-galerie');
+
+      GALERIE.forEach(function (polozka) {
+        var src = polozka[0], popis = polozka[1];
+        var fig = document.createElement('figure');
+        fig.hidden = true;
+        var ram = document.createElement('div');
+        ram.className = 'phone on';
+        var img = document.createElement('img');
+        img.alt = popis;
+        img.loading = 'lazy';
+        img.addEventListener('load', function () {
+          fig.hidden = false;
+          sekce.style.display = 'block';
+          if (odkaz) odkaz.hidden = false;
+        });
+        img.src = src;
+        ram.appendChild(img);
+        var cap = document.createElement('figcaption');
+        cap.textContent = popis;
+        fig.appendChild(ram);
+        fig.appendChild(cap);
+        fig.addEventListener('click', function () { otevri(fig); });
+        strip.appendChild(fig);
+      });
+
+      // Lightbox (šipky, Esc, klik mimo). Pracuje se seznamem VIDITELNÝCH
+      // figur, takže přeskakuje snímky, které se nenačetly.
+      var lb = document.getElementById('lb');
+      var lbImg = lb.querySelector('img');
+      var lbCap = lb.querySelector('.cap');
+      var idx = 0;
+
+      function viditelne() {
+        return Array.prototype.filter.call(strip.children, function (f) { return !f.hidden; });
+      }
+      function otevri(fig) {
+        idx = Math.max(0, viditelne().indexOf(fig));
+        vykresli();
+        lb.classList.add('on');
+      }
+      function vykresli() {
+        var fig = viditelne()[idx];
+        if (!fig) return;
+        var img = fig.querySelector('img');
+        lbImg.src = img.src;
+        lbImg.alt = img.alt;
+        lbCap.textContent = img.alt;
+      }
+      function posun(o) {
+        var n = viditelne().length;
+        if (!n) return;
+        idx = (idx + o + n) % n;
+        vykresli();
+      }
+      lb.querySelector('.close').addEventListener('click', function () { lb.classList.remove('on'); });
+      lb.querySelector('.prev').addEventListener('click', function (e) { e.stopPropagation(); posun(-1); });
+      lb.querySelector('.next').addEventListener('click', function (e) { e.stopPropagation(); posun(1); });
+      lb.addEventListener('click', function (e) { if (e.target === lb || e.target === lbImg) lb.classList.remove('on'); });
+      document.addEventListener('keydown', function (e) {
+        if (!lb.classList.contains('on')) return;
+        if (e.key === 'Escape') lb.classList.remove('on');
+        if (e.key === 'ArrowLeft') posun(-1);
+        if (e.key === 'ArrowRight') posun(1);
+      });
+    })();
+
+    // VIDEO. Stejný princip jako u snímků: sekce se ukáže, jen když soubor na
+    // serveru opravdu leží (jinak by tam zůstal černý obdélník s křížkem).
+    (function () {
+      var sek = document.getElementById('video');
+      var v = sek.querySelector('video');
+      fetch('video/ukazka.mp4', { method: 'HEAD' })
+        .then(function (r) {
+          if (!r.ok) return;
+          var typ = r.headers.get('content-type') || '';
+          if (typ.indexOf('text/html') === 0) return; // 404 stránka místo souboru
+          sek.style.display = 'block';
+          v.load();
+        })
+        .catch(function () { /* video prostě není — sekce zůstane schovaná */ });
+    })();
+
+    // Jemné odhalení sekcí při scrollu. Rozhodnuto už v <head> (třída `anim`);
+    // bez ní jsou sekce vidět rovnou a tenhle blok nemá co dělat.
+    (function () {
+      if (!document.documentElement.classList.contains('anim')) return;
+      var io = new IntersectionObserver(function (zaznamy) {
+        zaznamy.forEach(function (z) {
+          if (z.isIntersecting) { z.target.classList.add('in'); io.unobserve(z.target); }
+        });
+      }, { rootMargin: '0px 0px -60px 0px' });
+      document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
     })();
   </script>
 </body>
