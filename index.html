@@ -106,13 +106,14 @@
       color: var(--muted); text-decoration: none; font-size: .94rem; font-weight: 600;
     }
     nav.top .links a:hover { color: var(--text); }
-    nav.top .links a.nav-cta {
-      background: var(--green); color: #fff;
-      padding: 8px 16px; border-radius: 10px;
-    }
-    nav.top .links a.nav-cta:hover { background: var(--green-dark); color: #fff; }
+    /* „Stáhnout" v liště je jen ODKAZ nahoru, ne druhé tlačítko (24.8.2026,
+       reklamace „tlačítka stáhnout jsou tři: nahoře, pod tím a ještě dole").
+       Tlačítko je na stránce jediné — v heru. Na mobilu se z lišty schovají
+       ostatní odkazy, tenhle zůstane, ať je cesta ke stažení pořád po ruce. */
+    nav.top .links a.nav-dl { color: var(--green); }
+    nav.top .links a.nav-dl:hover { color: var(--green-dark); }
     @media (max-width: 720px) {
-      nav.top .links a:not(.nav-cta) { display: none; }
+      nav.top .links a:not(.nav-dl) { display: none; }
     }
 
     /* ===== Banner po ověření e-mailu (plní JS podle URL) ===== */
@@ -391,7 +392,13 @@
       width: 7px; height: 7px; border-radius: 50%; background: var(--green);
     }
     #novinky li strong { color: var(--text); }
-    #novinky .all { display: block; text-align: center; margin-top: 16px; font-size: .9rem; }
+    #novinky .all {
+      display: block; margin: 16px auto 0;
+      background: none; border: none; padding: 0;
+      font: inherit; font-size: .9rem; font-weight: 600;
+      color: var(--green); text-decoration: underline; text-underline-offset: 3px;
+      cursor: pointer;
+    }
 
     /* ===== FAQ ===== */
     #faq .box { max-width: 760px; margin: 0 auto; }
@@ -413,67 +420,153 @@
     #faq details p { color: var(--muted); font-size: .94rem; padding: 0 0 14px; }
     #faq details p + p { padding-top: 0; }
 
-    /* ===== Stažení ===== */
-    #stahnout .card {
-      max-width: 580px;
-      margin: 0 auto;
-      text-align: center;
-      box-shadow: var(--shadow);
+    #faq details ol {
+      color: var(--muted); font-size: .94rem;
+      margin: 0 0 14px; padding-left: 22px;
     }
-    #stahnout .badge { margin: 0 auto 12px; }
-    .cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 18px;
-      background: var(--green);
-      color: #fff;
-      font-size: 1.05rem;
-      font-weight: 700;
-      padding: 13px 30px;
-      border-radius: 14px;
-      text-decoration: none;
-      transition: background .15s;
-    }
-    .cta:hover { background: var(--green-dark); }
-    .cta-note { display: block; margin-top: 10px; font-size: .87rem; color: var(--muted); }
-    .cta-note strong { color: var(--text); }
-    #stahnout ol {
-      text-align: left;
-      margin: 16px auto 0;
-      max-width: 430px;
-      color: var(--muted);
-      font-size: .92rem;
-      padding-left: 22px;
-    }
-    #stahnout ol li { padding: 3px 0; }
-    #starsi-verze {
-      margin-top: 18px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-      display: none;
-      text-align: left;
-    }
-    #starsi-verze summary {
+    #faq details ol li { padding: 3px 0; }
+
+    /* ===== Stažení — na stránce JEDINÉ tlačítko, a to v heru =====
+       24.8.2026, reklamace uživatele „tlačítka stáhnout jsou tři: úplně
+       nahoře, pod tím a pak ještě úplně dole". Sekce #stahnout na konci
+       stránky i zelený pruh v liště jsou pryč; starší verze se nenabízí
+       další sekcí, ale OKNEM, které tohle jedno tlačítko otevře. */
+    /* Kotva `#stahnout` sedí v heru pod lepivou lištou — bez odsazení by
+       na ni appka („je nová verze") doskrolovala tak, že by lišta ukousla
+       vršek tlačítka. */
+    .dl { display: block; scroll-margin-top: 84px; }
+    .dl-older {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 14px;
+      background: none; border: none; padding: 0;
+      font: inherit; font-size: .9rem; font-weight: 600;
+      color: rgba(255,255,255,.88);
+      text-decoration: underline; text-underline-offset: 3px;
       cursor: pointer;
-      color: var(--green);
-      font-size: .92rem;
-      font-weight: 600;
-      text-align: center;
     }
-    #starsi-verze ul { list-style: none; margin-top: 12px; }
-    #starsi-verze li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: .9rem;
+    .dl-older:hover { color: #fff; }
+    .dl-older svg { width: 18px; height: 18px; }
+
+    /* Odkaz, který otevře okno s e-mailem (v otázkách a v patičce). */
+    .mail-odkaz {
+      background: none; border: none; padding: 0;
+      font: inherit; font-weight: 600;
+      color: var(--green); text-decoration: underline; text-underline-offset: 3px;
+      cursor: pointer;
     }
-    #starsi-verze li:last-child { border-bottom: none; }
-    #starsi-verze li span { color: var(--muted); }
-    #starsi-verze li a { color: var(--green); text-decoration: none; font-weight: 600; }
-    #starsi-verze li a:hover { text-decoration: underline; }
+
+    /* ===== Vyskakovací okna (verze ke stažení, kontakt) ===== */
+    .modal {
+      display: none;
+      position: fixed; inset: 0; z-index: 120;
+      background: rgba(0,0,0,.62);
+      padding: 20px;
+      align-items: center; justify-content: center;
+    }
+    .modal.on { display: flex; }
+    .modal .panel {
+      position: relative;
+      width: 100%; max-width: 640px;
+      max-height: 86vh; overflow-y: auto; overscroll-behavior: contain;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px 26px 22px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.42);
+    }
+    .modal .panel.uzky { max-width: 420px; text-align: center; }
+    .modal .x {
+      position: absolute; top: 12px; right: 12px;
+      width: 34px; height: 34px; border-radius: 50%;
+      border: none; background: var(--bg-alt); color: var(--muted);
+      font: inherit; font-size: 1rem; line-height: 1; cursor: pointer;
+    }
+    .modal .x:hover { color: var(--text); }
+    .modal h3 { font-size: 1.25rem; padding-right: 34px; }
+    .modal .sub { color: var(--muted); font-size: .92rem; margin-top: 6px; }
+    .modal .pata { color: var(--muted); font-size: .82rem; margin-top: 20px; text-align: center; }
+
+    /* Seznam verzí v okně: verze = rozklikávací položka i s tím, co přinesla.
+       24.8.2026 — dřív tu byl jen odkaz na GitHub Releases, jenže „někteří ho
+       nemají nebo se tam nevyznají". Texty vydání proto vypisuje web sám. */
+    #verze-seznam { margin-top: 16px; }
+    #verze-seznam .cekam {
+      color: var(--muted); font-size: .92rem;
+      text-align: center; padding: 18px 0;
+    }
+    .v { border-top: 1px solid var(--border); }
+    .v > summary {
+      cursor: pointer; list-style: none;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 13px 0;
+    }
+    .v > summary::-webkit-details-marker { display: none; }
+    .v > summary strong {
+      background: var(--badge); color: var(--green);
+      padding: 3px 12px; border-radius: 999px; font-size: .9rem;
+    }
+    .v > summary .nej {
+      background: var(--green); color: #fff;
+      padding: 2px 10px; border-radius: 999px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .v > summary .kdy { color: var(--muted); font-size: .88rem; }
+    .v > summary::after {
+      content: '+'; margin-left: auto; color: var(--green);
+      font-size: 1.3rem; font-weight: 400; line-height: 1;
+    }
+    .v[open] > summary::after { content: '–'; }
+    .v .telo { padding: 0 0 18px; }
+    .v .telo p { color: var(--muted); font-size: .92rem; margin-bottom: 10px; }
+    .v .telo h4 { font-size: .98rem; margin: 14px 0 6px; }
+    .v .telo hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+    .v .telo ul { list-style: none; margin-bottom: 14px; }
+    .v .telo li {
+      position: relative; padding-left: 20px; margin: 8px 0;
+      font-size: .92rem; color: var(--muted);
+    }
+    .v .telo li::before {
+      content: ''; position: absolute; left: 3px; top: .66em;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+    }
+    .v .telo strong { color: var(--text); }
+    .v .telo code {
+      background: var(--bg-alt); border-radius: 5px;
+      padding: 1px 5px; font-size: .86em;
+    }
+    .v .stahni {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green); color: #fff;
+      font-size: .92rem; font-weight: 700;
+      padding: 9px 18px; border-radius: 11px; text-decoration: none;
+    }
+    .v .stahni:hover { background: var(--green-dark); }
+    .v .stahni svg { width: 18px; height: 18px; }
+    .v .velikost { color: var(--muted); font-size: .82rem; margin-left: 10px; }
+
+    /* Kontakt v okně (24.8.2026) — `mailto:` rovnou otevíralo poštovní appku,
+       což na cizím počítači nebo bez nastavené pošty neudělá nic užitečného.
+       Adresa se proto nejdřív ukáže a jde zkopírovat; pošta až na vyžádání. */
+    #kontakt .mail {
+      font-size: 1.12rem; font-weight: 700;
+      background: var(--bg-alt); border: 1px solid var(--border);
+      border-radius: 12px; padding: 13px; margin: 16px 0 14px;
+      word-break: break-all;
+    }
+    #kontakt .akce { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    #kontakt .kopiruj {
+      border: none; background: var(--green); color: #fff;
+      font: inherit; font-weight: 700; font-size: .92rem;
+      padding: 10px 18px; border-radius: 11px; cursor: pointer;
+    }
+    #kontakt .kopiruj:hover { background: var(--green-dark); }
+    #kontakt .posta {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--border); background: none; color: var(--text);
+      font: inherit; font-weight: 600; font-size: .92rem;
+      padding: 10px 18px; border-radius: 11px; text-decoration: none;
+    }
+    #kontakt .posta:hover { border-color: var(--green); color: var(--green); }
 
     footer {
       text-align: center;
@@ -576,6 +669,11 @@
         <path d="M12 3.5v11M12 14.5 8 10.5M12 14.5l4-4"/>
         <path d="M4 16.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-2.5"/>
       </symbol>
+      <symbol id="i-history" viewBox="0 0 24 24">
+        <path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/>
+        <path d="M3.2 4.6v4.2h4.2"/>
+        <path d="M12 7.6V12l3 1.8"/>
+      </symbol>
       <symbol id="i-check" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="9"/>
         <path d="M8.2 12.3 11 15l4.8-5.4"/>
@@ -602,7 +700,7 @@
         <a href="#funkce">Funkce</a>
         <a href="#galerie" class="nav-galerie" hidden>Snímky</a>
         <a href="#faq">Otázky</a>
-        <a href="#stahnout" class="nav-cta">Stáhnout</a>
+        <a href="#top" class="nav-dl">Stáhnout</a>
       </div>
     </div>
   </nav>
@@ -617,11 +715,20 @@
         <img class="logo" src="icon.png" alt="Logo Čundr">
         <h1>Trasa, kterou si zapamatuješ</h1>
         <p class="tag">Čundr je turistická sociální síť. Naplánuj trasu nad mapami Mapy.com, zaživ ji se záznamem, hlasovou navigací a dobrodružstvím na cestě — a poděl se s partou.</p>
-        <a class="hero-cta apk-link" href="cundr-latest.apk">
-          <svg class="ic"><use href="#i-download"></use></svg>
-          Stáhnout pro Android
-        </a>
-        <span class="hero-note apk-version"></span>
+        <!-- JEDINÉ tlačítko „Stáhnout" na celé stránce (24.8.2026). Kotva
+             `stahnout` tu musí zůstat: míří na ni appka, když si všimne
+             novější verze (mobile/lib/updateCheck.ts → WEB_URL). -->
+        <div class="dl" id="stahnout">
+          <a class="hero-cta apk-link" href="cundr-latest.apk">
+            <svg class="ic"><use href="#i-download"></use></svg>
+            Stáhnout pro Android
+          </a>
+          <span class="hero-note apk-version"></span>
+          <button type="button" class="dl-older" data-okno="verze">
+            <svg class="ic"><use href="#i-history"></use></svg>
+            Starší verze a co která přinesla
+          </button>
+        </div>
         <div class="hero-chips">
           <span>Zdarma</span>
           <span>Bez reklam</span>
@@ -644,7 +751,7 @@
           <div class="badge"><svg class="ic"><use href="#i-map"></use></svg></div>
           <span class="step">1 · Naplánuj</span>
           <h3>Mapa a plánování</h3>
-          <p>Naklikej trasu po turistických cestách nebo ji nakresli od ruky. Uvidíš délku, převýšení i odhad času, přidáš k trase prvky a uložíš si ji.</p>
+          <p>Naklikej trasu po turistických cestách nebo ji nakresli od ruky. Uvidíš délku, převýšení i čas trasy spočítaný pro tvůj způsob pohybu, přidáš k trase prvky a uložíš si ji.</p>
         </div>
         <div class="card reveal">
           <div class="badge"><svg class="ic"><use href="#i-flame"></use></svg></div>
@@ -673,8 +780,8 @@
           <h3>Trasa přesně po turistických značkách</h3>
           <p>Klikáš do mapy a Čundr mezi body vede cestu po skutečných turistických cestách — ne vzdušnou čarou. Hned vidíš, co tě čeká.</p>
           <ul>
-            <li><svg class="ic"><use href="#i-check"></use></svg> Výškový profil s převýšením a odhadem času podle tvého tempa</li>
-            <li><svg class="ic"><use href="#i-check"></use></svg> Devět map: turistická, základní, letecká, zimní i venkovní</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Výškový profil s převýšením a časem trasy — na cestě ho Čundr přepočítává podle tvého naměřeného tempa</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Čtyři podklady: turistická, základní, letecká a zimní mapa</li>
             <li><svg class="ic"><use href="#i-check"></use></svg> Kreslení od ruky, když chceš jít mimo cesty</li>
             <li><svg class="ic"><use href="#i-check"></use></svg> Import a export GPX — trasy z jiných appek se neztratí</li>
           </ul>
@@ -772,7 +879,7 @@
         <div class="card">
           <div class="badge"><svg class="ic"><use href="#i-map"></use></svg></div>
           <h3>Turistické mapy Mapy.com</h3>
-          <p>Plánování klikáním do mapy s routováním po turistických cestách, výškovým profilem a odhadem času. Turistická, základní, letecká i zimní mapa.</p>
+          <p>Plánování klikáním do mapy s routováním po turistických cestách, výškovým profilem a časem trasy. Turistická, základní, letecká i zimní mapa.</p>
         </div>
         <div class="card">
           <div class="badge"><svg class="ic"><use href="#i-boot"></use></svg></div>
@@ -850,7 +957,7 @@
       <div class="box">
         <div class="ver"></div>
         <ul></ul>
-        <a class="all" href="https://github.com/Minsck/cundr-web/releases" target="_blank" rel="noopener">Všechny verze a jejich změny →</a>
+        <button type="button" class="all" data-okno="verze">Všechny verze a jejich změny →</button>
       </div>
     </div>
   </section>
@@ -866,6 +973,11 @@
         <details>
           <summary>Proč se instaluje APK a ne z Google Play?</summary>
           <p>Aplikace je pořád ve vývoji a vydání do Google Play se teprve chystá. Do té doby se instaluje ručně: stáhneš soubor APK z téhle stránky, otevřeš ho v telefonu a povolíš instalaci z tohoto zdroje. Telefon se na to zeptá jen jednou.</p>
+          <ol>
+            <li>Ťukni nahoře na <strong>Stáhnout pro Android</strong> a nech soubor stáhnout do telefonu.</li>
+            <li>Otevři stažený soubor a povol instalaci z tohoto zdroje, když se telefon zeptá.</li>
+            <li>Hotovo — appka funguje i bez účtu, s účtem se odemkne komunita.</li>
+          </ol>
           <p>Je to normální postup u aplikací mimo obchod. Soubor je vždycky ten, který sem nahrajeme my — nikde jinde ho nesháněj.</p>
         </details>
         <details>
@@ -897,37 +1009,40 @@
         </details>
         <details>
           <summary>Našel jsem chybu / mám nápad</summary>
-          <p>Napiš na <a href="mailto:jan.moucka@eli-beams.eu">jan.moucka@eli-beams.eu</a>. Reklamace z terénu jsou nejcennější věc, co může přijít — většina posledních oprav vznikla přesně takhle.</p>
+          <p>Napiš na <button type="button" class="mail-odkaz" data-okno="kontakt">minsck@seznam.cz</button>. Reklamace z terénu jsou nejcennější věc, co může přijít — většina posledních oprav vznikla přesně takhle.</p>
         </details>
       </div>
     </div>
   </section>
 
-  <section id="stahnout">
-    <div class="wrap">
-      <div class="card">
-        <div class="badge"><svg class="ic"><use href="#i-download"></use></svg></div>
-        <h3>Čundr pro Android (APK)</h3>
-        <p>Aplikace je ve vývoji — instaluje se zatím ručně přes APK. Verze pro Google Play se chystá.</p>
-        <a class="cta apk-link" href="cundr-latest.apk">
-          <svg class="ic"><use href="#i-download"></use></svg>
-          Stáhnout nejnovější APK
-        </a>
-        <span class="cta-note apk-version"></span>
-        <span class="cta-note">Zdarma · bez reklam · účet není povinný</span>
-        <ol>
-          <li>Stáhni APK do telefonu.</li>
-          <li>Otevři soubor a povol instalaci z tohoto zdroje, když se telefon zeptá.</li>
-          <li>Hotovo — appka funguje i bez účtu, s účtem se odemkne komunita.</li>
-        </ol>
+  <!-- OKNO: verze ke stažení i s tím, co která přinesla. Nahradilo sekci
+       „Stáhnout" na konci stránky (třetí tlačítko) i odkaz na GitHub Releases:
+       „někteří ho nemají nebo se tam nevyznají — lepší je to mít na webovce".
+       Obsah plní JS z GitHub API, viz blok „Verze APK" na konci souboru. -->
+  <div class="modal" id="verze" role="dialog" aria-modal="true" aria-labelledby="verze-nadpis" hidden>
+    <div class="panel">
+      <button type="button" class="x" aria-label="Zavřít">✕</button>
+      <h3 id="verze-nadpis">Verze Čundru</h3>
+      <p class="sub">Nahoře je nejnovější. Ťukni na verzi a uvidíš, co přinesla — a můžeš si ji stáhnout, i když je starší.</p>
+      <div id="verze-seznam"><p class="cekam">Načítám verze…</p></div>
+      <p class="pata">Appka se instaluje ručně z APK: stažený soubor otevři v telefonu a povol instalaci z tohoto zdroje. Starší verze se nikdy nemažou.</p>
+    </div>
+  </div>
 
-        <details id="starsi-verze">
-          <summary>Starší verze ke stažení</summary>
-          <ul id="starsi-verze-list"></ul>
-        </details>
+  <!-- OKNO: kontakt. Adresa se ukáže a jde zkopírovat — ťuknutí na „kontakt"
+       už uživatele nehodí rovnou do poštovní aplikace (24.8.2026). -->
+  <div class="modal" id="kontakt" role="dialog" aria-modal="true" aria-labelledby="kontakt-nadpis" hidden>
+    <div class="panel uzky">
+      <button type="button" class="x" aria-label="Zavřít">✕</button>
+      <h3 id="kontakt-nadpis">Napiš mi</h3>
+      <p class="sub">Chyby z terénu i nápady jsou to nejcennější, co může přijít.</p>
+      <p class="mail" id="mail-adresa">minsck@seznam.cz</p>
+      <div class="akce">
+        <button type="button" class="kopiruj">Zkopírovat adresu</button>
+        <a class="posta" href="mailto:minsck@seznam.cz">Otevřít v poště</a>
       </div>
     </div>
-  </section>
+  </div>
 
   <div id="lb" role="dialog" aria-modal="true" aria-label="Zvětšený snímek">
     <button class="close" aria-label="Zavřít">✕</button>
@@ -938,7 +1053,7 @@
   </div>
 
   <footer>
-    <p>Čundr · hobby projekt · <a href="mailto:jan.moucka@eli-beams.eu">kontakt</a> · <a href="soukromi.html">ochrana soukromí</a></p>
+    <p>Čundr · hobby projekt · <button type="button" class="mail-odkaz" data-okno="kontakt">kontakt</button> · <a href="soukromi.html">ochrana soukromí</a></p>
     <p>Mapové podklady © <a href="https://api.mapy.com/copyright" target="_blank" rel="noopener">Seznam.cz, a.s. a další</a> · Data míst © přispěvatelé OpenStreetMap</p>
   </footer>
 
@@ -972,7 +1087,9 @@
 
     // Verze APK se čtou ŽIVĚ z GitHub Releases (repo cundr-web), takže se web
     // po vydání nové verze nemusí nasazovat znovu. Jedním dotazem se obslouží
-    // popisek verze u tlačítka, seznam starších verzí i sekce „Co je nového".
+    // popisek verze u tlačítka, sekce „Co je nového" i OKNO „Verze Čundru"
+    // (všechny verze i s tím, co přinesly — 24.8.2026 nahradilo pouhý odkaz
+    // na GitHub Releases: „někteří ho nemají nebo se tam nevyznají").
     // Releases se nikdy nemažou → starší APK zůstávají ke stažení natrvalo.
     //
     // TLAČÍTKO „STÁHNOUT" ALE NA RELEASE NEMÍŘÍ (14.8.2026, reklamace uživatele
@@ -1005,6 +1122,10 @@
         return new Date(iso).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
       }
 
+      function velikost(b) {
+        return b ? Math.round(b / 1048576) + ' MB' : '';
+      }
+
       // Popis vydání je náš vlastní text z releases/POZNAMKY-vX.Y.Z.md (odrážky
       // „- **tučně** — zbytek"). Renderuje se RUČNĚ a přes textContent, takže
       // ani kdyby se do popisu jednou dostalo HTML, nic se nespustí.
@@ -1015,24 +1136,75 @@
           .map(function (l) { return l.replace(/^[-*]\s+/, ''); });
       }
       function tucne(text, li) {
-        // **takhle** → <strong>, zbytek jako čistý text.
-        text.split(/(\*\*[^*]+\*\*)/).forEach(function (kus) {
+        // **takhle** → <strong>, `takhle` → <code>, zbytek jako čistý text.
+        text.split(/(\*\*[^*]+\*\*|`[^`]+`)/).forEach(function (kus) {
           if (!kus) return;
           if (/^\*\*[^*]+\*\*$/.test(kus)) {
             var b = document.createElement('strong');
             b.textContent = kus.slice(2, -2);
             li.appendChild(b);
+          } else if (/^`[^`]+`$/.test(kus)) {
+            var c = document.createElement('code');
+            c.textContent = kus.slice(1, -1);
+            li.appendChild(c);
           } else {
             li.appendChild(document.createTextNode(kus));
           }
         });
       }
 
+      // CELÝ popis vydání do okna s verzemi — ne jen odrážky jako v „Co je
+      // nového". Starší poznámky mají i úvodní odstavec, mezinadpis (##) nebo
+      // oddělovač (---), a bez nich by z nich zbyly nesouvislé věty.
+      function popis(body, cil) {
+        var ul = null;
+        (body || '').split('\n').forEach(function (radek) {
+          var l = radek.trim();
+          if (!l) { ul = null; return; }
+          if (/^-{3,}$/.test(l)) {
+            ul = null;
+            cil.appendChild(document.createElement('hr'));
+            return;
+          }
+          l = l.replace(/^>\s*/, '');    // citace v poznámkách čteme jako větu
+          if (/^#{1,6}\s+/.test(l)) {
+            ul = null;
+            var h = document.createElement('h4');
+            tucne(l.replace(/^#{1,6}\s+/, ''), h);
+            cil.appendChild(h);
+            return;
+          }
+          if (/^[-*]\s+/.test(l)) {
+            if (!ul) { ul = document.createElement('ul'); cil.appendChild(ul); }
+            var li = document.createElement('li');
+            tucne(l.replace(/^[-*]\s+/, ''), li);
+            ul.appendChild(li);
+            return;
+          }
+          ul = null;
+          var p = document.createElement('p');
+          tucne(l, p);
+          cil.appendChild(p);
+        });
+      }
+
+      // Když se seznam nenačte (offline, limit GitHub API), okno to řekne
+      // rovnou — prázdné okno vypadá jako rozbitá stránka.
+      function selhalo() {
+        var seznam = document.getElementById('verze-seznam');
+        if (!seznam) return;
+        seznam.textContent = '';
+        var p = document.createElement('p');
+        p.className = 'cekam';
+        p.textContent = 'Seznam verzí se teď nepodařilo načíst. Zkus to za chvíli — tlačítko „Stáhnout pro Android" funguje i tak.';
+        seznam.appendChild(p);
+      }
+
       fetch('https://api.github.com/repos/Minsck/cundr-web/releases?per_page=30')
         .then(function (r) { return r.ok ? r.json() : []; })
         .then(function (releases) {
           var withApk = (releases || []).filter(apkOf);
-          if (!withApk.length) return;
+          if (!withApk.length) { selhalo(); return; }
 
           // --- nejnovější verze: odkaz + verze s datem A ČASEM vydání ---
           var latest = withApk[0];
@@ -1079,27 +1251,138 @@
             sek.style.display = 'block';
           }
 
-          // --- starší verze: jen datum vydání ---
-          var list = document.getElementById('starsi-verze-list');
-          var wrap = document.getElementById('starsi-verze');
-          var older = withApk.slice(1);
-          if (!older.length) return;
+          // --- okno „Verze Čundru": VŠECHNY verze, každá i s popisem ---
+          var seznam = document.getElementById('verze-seznam');
+          seznam.textContent = '';
 
-          older.forEach(function (rel) {
+          withApk.forEach(function (rel, i) {
             var apk = apkOf(rel);
-            var li = document.createElement('li');
+            var v = verOf(rel, apk);
+            var det = document.createElement('details');
+            det.className = 'v';
+            // Všechny zabalené: smysl okna je VIDĚT SEZNAM VERZÍ a moct sáhnout
+            // po starší. Rozbalená nejnovější (osm odrážek) by seznam odsunula
+            // pod okraj a okno by vypadalo jako další „Co je nového".
+
+            var sum = document.createElement('summary');
+            var b = document.createElement('strong');
+            b.textContent = 'v' + v;
+            sum.appendChild(b);
+            if (i === 0) {
+              var nej = document.createElement('span');
+              nej.className = 'nej';
+              nej.textContent = 'nejnovější';
+              sum.appendChild(nej);
+            }
+            if (rel.published_at) {
+              var kdy = document.createElement('span');
+              kdy.className = 'kdy';
+              kdy.textContent = datum(rel.published_at);
+              sum.appendChild(kdy);
+            }
+            det.appendChild(sum);
+
+            var telo = document.createElement('div');
+            telo.className = 'telo';
+            popis(rel.body, telo);
+
             var a = document.createElement('a');
-            a.href = apk.browser_download_url;
-            a.textContent = 'v' + verOf(rel, apk);
-            var span = document.createElement('span');
-            span.textContent = rel.published_at ? datum(rel.published_at) : '';
-            li.appendChild(a);
-            li.appendChild(span);
-            list.appendChild(li);
+            a.className = 'stahni';
+            // Nejnovější se bere z Pages (stejný server, odkaz nevyprší — viz
+            // komentář výš); starší jsou archiv a leží jen na Releases.
+            a.href = i === 0
+              ? 'cundr-latest.apk' + (v ? '?v=' + encodeURIComponent(v) : '')
+              : apk.browser_download_url;
+            if (i === 0 && v) a.setAttribute('download', 'cundr-v' + v + '.apk');
+            var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            ic.setAttribute('class', 'ic');
+            var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+            use.setAttribute('href', '#i-download');
+            ic.appendChild(use);
+            a.appendChild(ic);
+            a.appendChild(document.createTextNode('Stáhnout v' + v));
+            telo.appendChild(a);
+
+            var vel = document.createElement('span');
+            vel.className = 'velikost';
+            vel.textContent = velikost(apk.size);
+            telo.appendChild(vel);
+
+            det.appendChild(telo);
+            seznam.appendChild(det);
           });
-          wrap.style.display = 'block';
         })
-        .catch(function () { /* fallback: odkazy míří na stránku releasů */ });
+        .catch(selhalo);
+    })();
+
+    // VYSKAKOVACÍ OKNA (verze ke stažení, kontakt). Otevře je cokoli
+    // s `data-okno="<id>"`, zavírá křížek, kliknutí mimo panel i Esc.
+    (function () {
+      var otevrene = null;
+
+      function otevri(id) {
+        var m = document.getElementById(id);
+        if (!m) return;
+        zavri();
+        m.removeAttribute('hidden');
+        m.classList.add('on');
+        otevrene = m;
+        var x = m.querySelector('.x');
+        if (x) x.focus();
+      }
+      function zavri() {
+        if (!otevrene) return;
+        otevrene.classList.remove('on');
+        otevrene.setAttribute('hidden', '');
+        otevrene = null;
+      }
+
+      document.querySelectorAll('[data-okno]').forEach(function (t) {
+        t.addEventListener('click', function (e) {
+          e.preventDefault();
+          otevri(t.getAttribute('data-okno'));
+        });
+      });
+      document.querySelectorAll('.modal').forEach(function (m) {
+        m.addEventListener('click', function (e) { if (e.target === m) zavri(); });
+        var x = m.querySelector('.x');
+        if (x) x.addEventListener('click', zavri);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && otevrene) zavri();
+      });
+
+      // Kopírování adresy. `navigator.clipboard` je jen na HTTPS (Pages ho
+      // mají), ale kdyby chybělo, zaskočí staré `execCommand` přes dočasné
+      // pole — jinak by tlačítko na některých prohlížečích jen mlčelo.
+      var kop = document.querySelector('#kontakt .kopiruj');
+      var adresa = document.getElementById('mail-adresa');
+      if (kop && adresa) {
+        kop.addEventListener('click', function () {
+          var text = adresa.textContent.trim();
+          var puvodni = kop.textContent;
+          function hotovo() {
+            kop.textContent = 'Zkopírováno ✓';
+            setTimeout(function () { kop.textContent = puvodni; }, 1800);
+          }
+          function zaloha() {
+            var pole = document.createElement('textarea');
+            pole.value = text;
+            pole.setAttribute('readonly', '');
+            pole.style.position = 'fixed';
+            pole.style.opacity = '0';
+            document.body.appendChild(pole);
+            pole.select();
+            try { document.execCommand('copy'); hotovo(); } catch (e) { /* nic */ }
+            document.body.removeChild(pole);
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(hotovo, zaloha);
+          } else {
+            zaloha();
+          }
+        });
+      }
     })();
 
     // SNÍMKY OBRAZOVKY. Rámečky telefonu jsou v HTML skryté (`.phone` má
@@ -1109,7 +1392,7 @@
     (function () {
       var GALERIE = [
         ['snimky/mapa-planovani.jpg', 'Plánování trasy'],
-        ['snimky/planovani-profil.jpg', 'Výškový profil a odhad času'],
+        ['snimky/planovani-profil.jpg', 'Výškový profil a čas trasy'],
         ['snimky/dobrodruzstvi.jpg', 'Dobrodružství: záznam a HUD'],
         ['snimky/navigace.jpg', 'Hlasová navigace'],
         ['snimky/prvek-hadanka.jpg', 'Hádanka na trase'],
